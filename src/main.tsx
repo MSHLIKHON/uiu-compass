@@ -11,7 +11,7 @@ import "./styles.css";
 import "./refinement.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Provider>
         <App />
       </Provider>
