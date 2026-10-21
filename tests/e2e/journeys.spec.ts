@@ -90,16 +90,14 @@ test("onboarding persists, theme and Bangla work", async ({
 test("course history, edit, and discrete target scenario", async ({ page }) => {
   await seed(page);
   await page.goto("/calculator");
-  await page.getByLabel("Course code", { exact: true }).fill("TEST 100");
-  await page.getByLabel("Course title").fill("Hypothetical test course");
   await page
     .getByRole("combobox", { name: "Grade", exact: true })
     .selectOption("A-");
   await page.getByRole("button", { name: "Add course", exact: true }).click();
   await expect(
-    page.getByRole("cell", { name: "TEST 100 Hypothetical test course" }),
+    page.getByRole("cell", { name: "COURSE 1", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Edit TEST 100" }).click();
+  await page.getByRole("button", { name: "Edit COURSE 1" }).click();
   await page.getByLabel("Credits", { exact: true }).fill("1.5");
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(

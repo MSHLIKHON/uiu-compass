@@ -79,7 +79,6 @@ it("previews a draft course immediately and preserves genuine zero GPA", () => {
   mount(<Calculator />);
   fill("Previous CGPA", "3");
   fill("Previous GPA credits", "30");
-  fill("Course code", "TEST 101");
   expect(screen.getByText("3.09")).toBeInTheDocument();
   fill("Grade", "F");
   expect(screen.getByText("2.73")).toBeInTheDocument();
@@ -112,8 +111,18 @@ it("detailed draft updates before save and uses the saved term", () => {
   );
   mount(<Calculator />);
   expect(screen.getByLabelText("Selected term")).toHaveValue("Fall 2026");
-  fill("Course code", "TEST 101");
   expect(screen.getAllByText("3.50").length).toBeGreaterThan(0);
+});
+it("adds a course with only credits and grade", () => {
+  mount(<Calculator />);
+  fireEvent.click(screen.getByRole("button", { name: "Add course" }));
+  const saved = JSON.parse(localStorage.getItem(KEY)!);
+  expect(saved.courses).toHaveLength(1);
+  expect(saved.courses[0]).toMatchObject({
+    code: "COURSE 1",
+    credits: 3,
+    grade: "A",
+  });
 });
 it("fee input changes recompute and blank rates never become zero cost", () => {
   mount(<Fees />);

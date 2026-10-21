@@ -31,7 +31,7 @@ const blank = (): Course => ({
 export default function Calculator() {
   const { data, update, t, notify } = useApp();
   const [draft, setDraft] = useState(blank);
-  const [draftActive, setDraftActive] = useState(false);
+  const [draftActive, setDraftActive] = useState(true);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [previous, setPrevious] = useState(
@@ -153,11 +153,26 @@ export default function Calculator() {
             onSubmit={(e) => {
               e.preventDefault();
               setError("");
+              const enteredCode = draft.code.trim().toUpperCase();
+              const nextAutomaticNumber =
+                Math.max(
+                  0,
+                  ...history.map((course) => {
+                    const match = /^COURSE (\d+)$/.exec(course.code);
+                    return match ? Number(match[1]) : 0;
+                  }),
+                ) + 1;
+              const code = enteredCode || `COURSE ${nextAutomaticNumber}`;
+              const normalizedDraft = {
+                ...draft,
+                term: draft.term.trim() || "Current term",
+                code,
+              };
               if (
                 history.some(
                   (c) =>
                     c.id !== draft.id &&
-                    c.code.toUpperCase() === draft.code.trim().toUpperCase() &&
+                    c.code.toUpperCase() === code &&
                     c.attempt === draft.attempt,
                 )
               ) {
@@ -169,17 +184,12 @@ export default function Calculator() {
                   ...d,
                   courses: editing
                     ? d.courses.map((c) =>
-                        c.id === draft.id
-                          ? { ...draft, code: draft.code.trim().toUpperCase() }
-                          : c,
+                        c.id === draft.id ? normalizedDraft : c,
                       )
-                    : [
-                        ...d.courses,
-                        { ...draft, code: draft.code.trim().toUpperCase() },
-                      ],
+                    : [...d.courses, normalizedDraft],
                 }));
-                setTerm(draft.term);
-                setDraft({ ...blank(), term: draft.term });
+                setTerm(normalizedDraft.term);
+                setDraft({ ...blank(), term: normalizedDraft.term });
                 setEditing(false);
                 setDraftActive(false);
                 notify(t("Course saved.", "কোর্স সংরক্ষিত হয়েছে।"));
@@ -189,30 +199,6 @@ export default function Calculator() {
             }}
           >
             <div className="form-grid">
-              <Field label={t("Term", "টার্ম")}>
-                <input
-                  value={draft.term}
-                  required
-                  maxLength={200}
-                  onChange={(e) => set("term", e.target.value)}
-                />
-              </Field>
-              <Field label={t("Course code", "কোর্স কোড")}>
-                <input
-                  value={draft.code}
-                  required
-                  maxLength={100}
-                  onChange={(e) => set("code", e.target.value)}
-                  placeholder="CSE 1111"
-                />
-              </Field>
-              <Field label={t("Course title", "কোর্সের নাম")}>
-                <input
-                  value={draft.title}
-                  maxLength={200}
-                  onChange={(e) => set("title", e.target.value)}
-                />
-              </Field>
               <NumberField
                 label={t("Credits", "ক্রেডিট")}
                 value={draft.credits}
@@ -230,42 +216,80 @@ export default function Calculator() {
                   ))}
                 </select>
               </Field>
-              <NumberField
-                label={t("Attempt number", "কততম চেষ্টা")}
-                value={draft.attempt}
-                min={1}
-                max={100}
-                step="1"
-                onChange={(n) => set("attempt", n)}
-              />
-              <Field label={t("Category", "ধরন")}>
-                <select
-                  value={draft.category}
-                  onChange={(e) =>
-                    set("category", e.target.value as Course["category"])
-                  }
-                >
-                  {[
-                    "core",
-                    "elective",
-                    "project",
-                    "thesis",
-                    "internship",
-                    "lab",
-                  ].map((g) => (
-                    <option key={g}>{g}</option>
-                  ))}
-                </select>
-              </Field>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={draft.excluded}
-                  onChange={(e) => set("excluded", e.target.checked)}
-                />
-                {t("Exclude from all totals", "সব হিসাব থেকে বাদ দিন")}
-              </label>
             </div>
+            <Advanced
+              title={t("Optional course details", "ঐচ্ছিক কোর্সের বিস্তারিত")}
+            >
+              <p className="caption">
+                {t(
+                  "Only add these details when you need term history or retake tracking.",
+                  "টার্মের ইতিহাস বা রিটেক হিসাবের দরকার হলেই এই তথ্য দিন।",
+                )}
+              </p>
+              <div className="form-grid">
+                <Field label={t("Term (optional)", "টার্ম (ঐচ্ছিক)")}>
+                  <input
+                    value={draft.term}
+                    maxLength={200}
+                    onChange={(e) => set("term", e.target.value)}
+                  />
+                </Field>
+                <Field
+                  label={t("Course code (optional)", "কোর্স কোড (ঐচ্ছিক)")}
+                >
+                  <input
+                    value={draft.code}
+                    maxLength={100}
+                    onChange={(e) => set("code", e.target.value)}
+                    placeholder="CSE 1111"
+                  />
+                </Field>
+                <Field
+                  label={t("Course title (optional)", "কোর্সের নাম (ঐচ্ছিক)")}
+                >
+                  <input
+                    value={draft.title}
+                    maxLength={200}
+                    onChange={(e) => set("title", e.target.value)}
+                  />
+                </Field>
+                <NumberField
+                  label={t("Attempt number", "কততম চেষ্টা")}
+                  value={draft.attempt}
+                  min={1}
+                  max={100}
+                  step="1"
+                  onChange={(n) => set("attempt", n)}
+                />
+                <Field label={t("Category", "ধরন")}>
+                  <select
+                    value={draft.category}
+                    onChange={(e) =>
+                      set("category", e.target.value as Course["category"])
+                    }
+                  >
+                    {[
+                      "core",
+                      "elective",
+                      "project",
+                      "thesis",
+                      "internship",
+                      "lab",
+                    ].map((g) => (
+                      <option key={g}>{g}</option>
+                    ))}
+                  </select>
+                </Field>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={draft.excluded}
+                    onChange={(e) => set("excluded", e.target.checked)}
+                  />
+                  {t("Exclude from all totals", "সব হিসাব থেকে বাদ দিন")}
+                </label>
+              </div>
+            </Advanced>
             <ResultError message={error} />
             <div className="actions">
               <button className="button">
