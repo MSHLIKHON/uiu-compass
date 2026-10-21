@@ -343,6 +343,7 @@ input[type="checkbox"] {
 }
 .advanced-content {
   padding: 6px 20px 20px;
+  min-width: 0;
 }
 .advanced-content > .card {
   border: 0;
@@ -545,6 +546,45 @@ input[type="checkbox"] {
 .table-wrap {
   max-width: 100%;
   overflow: auto;
+}
+.card,
+.two-col > *,
+.breakdown > div {
+  min-width: 0;
+}
+.breakdown > div,
+.breakdown b,
+.breakdown small {
+  overflow-wrap: anywhere;
+}
+.curriculum-guide {
+  margin: 6px 0 20px;
+  padding: 20px;
+  border-radius: 10px;
+  background: var(--soft);
+}
+.curriculum-guide h2 {
+  margin-bottom: 12px;
+}
+.curriculum-guide ol {
+  margin: 0;
+  padding-left: 22px;
+}
+.curriculum-guide li {
+  margin: 8px 0;
+  line-height: 1.65;
+}
+.curriculum-guide p {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.modal-backdrop {
+  z-index: 300;
+}
+.modal {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 table {
   font-size: 14px;
@@ -764,6 +804,13 @@ th {
   }
   .advanced-content {
     padding: 4px 16px 16px;
+  }
+  .modal-backdrop {
+    padding: 16px;
+  }
+  .modal {
+    width: 100%;
+    padding: 22px;
   }
   .section-tabs {
     margin-bottom: 22px;

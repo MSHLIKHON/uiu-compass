@@ -361,6 +361,41 @@ export default function Graduation() {
           "পাঠ্যক্রমের তালিকা ও সম্ভাব্য ক্রম",
         )}
       >
+        <div className="curriculum-guide">
+          <h2>{t("How this planner works", "এই প্ল্যানার যেভাবে কাজ করে")}</h2>
+          <ol>
+            <li>
+              {t(
+                "Load the verified CSE subset when eligible, then add the remaining courses from your approved curriculum.",
+                "প্রযোজ্য হলে যাচাইকৃত CSE অংশ যোগ করুন, তারপর আপনার অনুমোদিত কারিকুলাম থেকে বাকি কোর্স দিন।",
+              )}
+            </li>
+            <li>
+              {t(
+                "A requirement becomes Passed when a passing course with the same code exists in Academic history.",
+                "Academic history-তে একই কোডের পাস করা কোর্স থাকলে requirement-টি Passed হবে।",
+              )}
+            </li>
+            <li>
+              {t(
+                "Uncheck elective alternatives you do not plan to take and enter prerequisite course codes exactly.",
+                "যে elective বিকল্প নেবেন না সেটি বাদ দিন এবং prerequisite কোড ঠিকভাবে লিখুন।",
+              )}
+            </li>
+            <li>
+              {t(
+                "The suggestion places eligible courses into terms up to your credit limit; prerequisites move dependent courses to later terms.",
+                "নির্বাচিত credit limit পর্যন্ত উপযুক্ত কোর্স একেক টার্মে বসবে; prerequisite থাকা কোর্স পরের টার্মে যাবে।",
+              )}
+            </li>
+          </ol>
+          <p>
+            {t(
+              "This sequence covers only the requirements currently loaded below. It does not certify graduation or predict course availability.",
+              "এই sequence শুধু নিচে যোগ করা requirement-এর জন্য। এটি graduation বা course availability নিশ্চিত করে না।",
+            )}
+          </p>
+        </div>
         <Card>
           <h2>{t("Your curriculum checklist", "আপনার পাঠ্যক্রমের তালিকা")}</h2>
           <p className="caption">

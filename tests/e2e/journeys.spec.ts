@@ -308,3 +308,37 @@ test("report print action opens browser printing", async ({ page }) => {
   const pdf = await page.pdf({ format: "A4" });
   expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
 });
+
+test("mobile install dialog covers the viewport without being trapped in the sidebar", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile");
+  await page.goto("/graduation");
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await page.getByRole("button", { name: "Install Compass" }).click();
+  const backdrop = page.locator(".modal-backdrop");
+  await expect(backdrop).toBeVisible();
+  const box = await backdrop.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box?.x).toBe(0);
+  expect(box?.y).toBe(0);
+  expect(box?.width).toBe(viewport?.width);
+  expect(box?.height).toBe(viewport?.height);
+  await expect(page.getByRole("dialog")).toBeInViewport();
+});
+
+test("curriculum planner explains its inputs and sequence limits", async ({
+  page,
+}) => {
+  await seed(page);
+  await page.goto("/graduation");
+  await page
+    .getByText("Curriculum checklist & suggested sequence", { exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "How this planner works" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/only the requirements currently loaded below/),
+  ).toBeVisible();
+});
