@@ -13,6 +13,8 @@ describe("Manual financial fixtures — applicability not asserted", () => {
     firstRetake: 3,
     firstDiscount: 50,
     termFee: 6500,
+    gymFee: 1000,
+    busFee: 1500,
     other: 2000,
     paid: 20000,
   };
@@ -22,8 +24,8 @@ describe("Manual financial fixtures — applicability not asserted", () => {
     expect(r.benefit).toBe(2925000);
     expect(r.retake).toBe(3900000);
     expect(r.retakeBenefit).toBe(975000);
-    expect(r.total).toBe(8650000);
-    expect(r.balance).toBe(6650000);
+    expect(r.total).toBe(8900000);
+    expect(r.balance).toBe(6900000);
   });
   it("does not waive term and other fees", () =>
     expect(
@@ -35,7 +37,23 @@ describe("Manual financial fixtures — applicability not asserted", () => {
         firstRetake: 0,
         waiver: 100,
       }).total,
-    ).toBe(850000));
+    ).toBe(1100000));
+  it("keeps semester, gym and bus fees outside the tuition waiver", () => {
+    const r = tuition({
+      ...initial.finance,
+      rate: 6500,
+      regular: 12,
+      waiver: 100,
+      termFee: 6500,
+      gymFee: 1000,
+      busFee: 1500,
+    });
+    expect(r.benefit).toBe(7800000);
+    expect(r.termFee).toBe(650000);
+    expect(r.gymFee).toBe(100000);
+    expect(r.busFee).toBe(150000);
+    expect(r.total).toBe(900000);
+  });
   it("preserves integer paisa for decimal inputs", () => {
     const r = tuition({
       ...initial.finance,

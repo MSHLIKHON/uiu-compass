@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useApp } from "../state/AppState";
 import { summary } from "../state/selectors";
 import { csePartial, batchAtLeast } from "../policy/repository";
-import { money } from "../domain/finance";
+import { money, tuition } from "../domain/finance";
 import { project } from "../domain/academic";
 import { curriculumPlan } from "../domain/curriculum";
 import type { Requirement } from "../domain/types";
@@ -63,6 +63,22 @@ export default function Graduation() {
     return degree - earned;
   });
   const remaining = remainingResult.result;
+  const paceCost = (creditsPerTerm: number) => {
+    if (!data.finance.rate || remaining === null) return null;
+    const terms = Math.ceil(remaining / creditsPerTerm);
+    return tuition({
+      ...data.finance,
+      regular: remaining,
+      excluded: 0,
+      retake: 0,
+      firstRetake: 0,
+      termFee: terms * data.finance.termFee,
+      gymFee: terms * data.finance.gymFee,
+      busFee: terms * data.finance.busFee,
+      other: 0,
+      paid: 0,
+    }).total;
+  };
   const canLoad =
     data.profile.program === "CSE" &&
     batchAtLeast(data.profile.batch, 2026, "Summer");
@@ -294,16 +310,9 @@ export default function Graduation() {
                 <b>
                   {remaining !== null ? Math.ceil(remaining / n) : "—"} terms*
                   <small style={{ display: "block" }}>
-                    {data.finance.rate && remaining !== null
-                      ? money(
-                          Math.round(
-                            ((remaining ?? 0) * data.finance.rate +
-                              Math.ceil((remaining ?? 0) / n) *
-                                data.finance.termFee) *
-                              100,
-                          ),
-                        )
-                      : "Cost requires saved fee rate"}
+                    {paceCost(n) === null
+                      ? "Save a fee plan to estimate cost"
+                      : money(paceCost(n)!)}
                   </small>
                 </b>
               </div>
@@ -345,8 +354,11 @@ export default function Graduation() {
             fees, excluding waivers and extras.
           </p>
           <p className="caption">
-            * Credit-only estimates. Prerequisites, electives, availability and
-            approved credit limits can extend duration.
+            * Cost assumes your saved tuition waiver continues for all remaining
+            credits. Semester, gym and bus fees repeat every estimated term and
+            receive no waiver. Lab/other fees, retakes and future fee changes
+            are excluded. Prerequisites and course availability can extend
+            duration.
           </p>
           <Note>
             CSE 2026: minimum CGPA 2.00, all requirements passed, final-year

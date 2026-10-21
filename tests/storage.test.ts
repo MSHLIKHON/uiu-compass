@@ -25,6 +25,14 @@ it("reads valid persisted data", () => {
   localStorage.setItem(KEY, JSON.stringify(d));
   expect(readData().data.theme).toBe("dark");
 });
+it("migrates saved fee plans created before gym and bus fields", () => {
+  const legacy = structuredClone(initial) as unknown as {
+    finance: Record<string, unknown>;
+  };
+  delete legacy.finance.gymFee;
+  delete legacy.finance.busFee;
+  expect(validateData(legacy).finance).toMatchObject({ gymFee: 0, busFee: 0 });
+});
 it("rejects duplicate curriculum codes and oversized data", () => {
   expect(() =>
     validateData({

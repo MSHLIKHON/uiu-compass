@@ -73,7 +73,7 @@ export default function Fees() {
           <div className="step-label">
             {t("1 · Enter information", "১ · তথ্য দিন")}
           </div>
-          <div className="form-grid">
+          <div className="form-grid fee-fields">
             <NumberField
               label={t("Tuition per credit (BDT)", "প্রতি ক্রেডিটের ফি (টাকা)")}
               value={f.rate}
@@ -100,11 +100,21 @@ export default function Fees() {
               value={f.termFee}
               onChange={(n) => set("termFee", n)}
             />
+            <NumberField
+              label={t("Gym / facility fee", "জিম / সুবিধা ফি")}
+              value={f.gymFee}
+              onChange={(n) => set("gymFee", n)}
+            />
+            <NumberField
+              label={t("Bus service fee", "বাস সার্ভিস ফি")}
+              value={f.busFee}
+              onChange={(n) => set("busFee", n)}
+            />
           </div>
           <p className="caption">
             {t(
-              "Use your own batch’s fee rate. Waivers do not reduce the term fee.",
-              "নিজের ব্যাচের ফি রেট ব্যবহার করুন। টার্ম ফিতে ওয়েভার প্রযোজ্য নয়।",
+              "Use your own batch’s rate. Scholarship or tuition waiver applies only to eligible tuition—not the semester, gym, bus or other service fees.",
+              "নিজের ব্যাচের রেট ব্যবহার করুন। Scholarship বা tuition waiver শুধু যোগ্য tuition-এ প্রযোজ্য—semester, gym, bus বা অন্য service fee-তে নয়।",
             )}
           </p>
           <Advanced
@@ -220,7 +230,7 @@ export default function Fees() {
               </select>
             </Field>
           </Advanced>
-          <div className="actions">
+          <div className="actions fee-actions">
             <button
               className="button"
               disabled={!r}
@@ -239,7 +249,7 @@ export default function Fees() {
               }
             >
               <RotateCcw size={16} />
-              {t("Reset unsaved changes", "সংরক্ষণ না করা পরিবর্তন মুছুন")}
+              {t("Undo changes", "পরিবর্তন বাতিল")}
             </button>
           </div>
         </Card>
@@ -266,7 +276,10 @@ export default function Fees() {
                     -r.retakeBenefit,
                   ],
                   [t("Tuition waiver", "টিউশন ওয়েভার"), -r.benefit],
-                  [t("Term & other fees", "টার্ম ও অন্যান্য ফি"), r.fees],
+                  [t("Semester / term fee", "সেমেস্টার / টার্ম ফি"), r.termFee],
+                  [t("Gym / facility fee", "জিম / সুবিধা ফি"), r.gymFee],
+                  [t("Bus service fee", "বাস সার্ভিস ফি"), r.busFee],
+                  [t("Lab and other fees", "ল্যাব ও অন্যান্য ফি"), r.otherFees],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <span>{label}</span>

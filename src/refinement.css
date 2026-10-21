@@ -214,6 +214,18 @@ input[type="checkbox"] {
 .form-grid {
   gap: 0 20px;
 }
+.fee-fields {
+  align-items: start;
+}
+.fee-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+.fee-actions button {
+  width: 100%;
+  justify-content: center;
+}
 .hint {
   display: none;
 }
@@ -804,6 +816,9 @@ th {
   }
   .advanced-content {
     padding: 4px 16px 16px;
+  }
+  .fee-actions {
+    grid-template-columns: 1fr;
   }
   .modal-backdrop {
     padding: 16px;

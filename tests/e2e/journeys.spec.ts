@@ -64,8 +64,8 @@ test("onboarding persists, theme and Bangla work", async ({
     .selectOption("cse2026");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("Current CGPA", { exact: true }).fill("3.2");
-  await page.getByLabel("GPA-denominator credits").fill("45");
-  await page.getByLabel("Earned degree credits").fill("42");
+  await page.getByLabel("Credits used for CGPA").fill("45");
+  await page.getByLabel("Credits completed toward your degree").fill("42");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("button", { name: "Open my compass" }).click();
   await expect(page.getByText("3.20", { exact: true })).toBeVisible();
@@ -124,12 +124,18 @@ test("fee breakdown validates allocations and stores plan", async ({
   await page.getByLabel("Non-waivable regular credits").fill("3");
   await page.getByLabel("Single tuition waiver").fill("50");
   await page.getByLabel("Trimester / semester fee").fill("6500");
+  await page.getByLabel("Gym / facility fee").fill("1000");
+  await page.getByLabel("Bus service fee").fill("1500");
+  await expect(page.getByTestId("fee-total")).toContainText("57,750");
   await page.getByRole("button", { name: "Save fee plan" }).click();
   expect(
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("uiu-compass:v1")!).finance.rate,
     ),
   ).toBe(6500);
+  await page.getByLabel("Gym / facility fee").fill("999");
+  await page.getByRole("button", { name: "Undo changes" }).click();
+  await expect(page.getByLabel("Gym / facility fee")).toHaveValue("1000");
   await page.getByLabel("Non-waivable regular credits").fill("13");
   await expect(page.getByRole("alert")).toContainText("cannot exceed");
   await expect(

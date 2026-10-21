@@ -60,6 +60,8 @@ export interface Finance {
   firstRetake: number;
   firstDiscount: number;
   termFee: number;
+  gymFee: number;
+  busFee: number;
   other: number;
   waiver: number;
   paid: number;

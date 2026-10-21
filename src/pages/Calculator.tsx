@@ -86,10 +86,10 @@ export default function Calculator() {
   return (
     <>
       <Heading
-        eyebrow={t("ACADEMIC TOOLS", "পড়াশোনার হিসাব")}
+        eyebrow={t("GRADES & CREDITS", "পড়াশোনার হিসাব")}
         title={t("Calculate your CGPA", "আপনার সিজিপিএ হিসাব করুন")}
         description={t(
-          "Calculate a term, or build your complete academic record.",
+          "Add credits and grades to see your term GPA and updated CGPA.",
           "এক টার্মের হিসাব করুন বা সব কোর্সের তথ্য যোগ করুন।",
         )}
       />
@@ -114,10 +114,10 @@ export default function Calculator() {
           {t("Detailed history", "বিস্তারিত ইতিহাস")}
         </button>
       </div>
-      <Advanced title={t("How grades are counted", "গ্রেড কীভাবে গণনা হয়")}>
+      <Advanced title={t("How CGPA is calculated", "গ্রেড কীভাবে গণনা হয়")}>
         <Note>
           {t(
-            "F = 0 points and no earned credit. I/W are provisionally excluded from numeric projections because their official denominator treatment is unverified. Repeated course codes require an explicit assumption in Retake Optimizer.",
+            "Each grade has a point value. We multiply it by the course credits, add the results, then divide by the counted credits. F adds zero points. I and W are left out of estimates. For a repeated course, choose a rule in the Retake planner.",
             "F এর পয়েন্ট শূন্য, ক্রেডিট অর্জিত হয় না। I/W এর গণনার নিয়ম নিশ্চিত নয় বলে পূর্বাভাস থেকে বাদ রাখা হয়। একই কোর্সের একাধিক চেষ্টার জন্য রিটেক প্ল্যানারে নিয়ম বেছে নিন।",
           )}
         </Note>
@@ -424,7 +424,7 @@ export default function Calculator() {
       </Advanced>
       <Card>
         <div className="section-title">
-          <h2>{t("Academic history", "পড়াশোনার ইতিহাস")}</h2>
+          <h2>{t("Saved courses", "পড়াশোনার ইতিহাস")}</h2>
           <button
             className="secondary"
             disabled={!current.length}

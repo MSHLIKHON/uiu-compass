@@ -27,7 +27,7 @@ export default function Setup() {
       <div className="setup-grid">
         <Card>
           <div className="steps">
-            {["Profile", "Academics", "Preferences"].map((s, i) => (
+            {["Your details", "Study info", "Preferences"].map((s, i) => (
               <span key={s} className={i === step ? "active" : ""}>
                 {i + 1}. {t(s, ["পরিচয়", "পড়াশোনা", "পছন্দ"][i])}
               </span>
@@ -133,18 +133,15 @@ export default function Setup() {
                       onChange={(n) => set("cgpa", n)}
                     />
                     <NumberField
-                      label={t(
-                        "GPA-denominator credits",
-                        "জিপিএ গণনার ক্রেডিট",
-                      )}
+                      label={t("Credits used for CGPA", "জিপিএ গণনার ক্রেডিট")}
                       value={p.gpaCredits}
                       max={2000}
                       onChange={(n) => set("gpaCredits", n)}
-                      hint="Use transcript GPA credits, not necessarily earned credits."
+                      hint="Enter the credit total your transcript uses to calculate CGPA."
                     />
                     <NumberField
                       label={t(
-                        "Earned degree credits",
+                        "Credits completed toward your degree",
                         "অর্জিত ডিগ্রি ক্রেডিট",
                       )}
                       value={p.earnedCredits}
@@ -155,7 +152,7 @@ export default function Setup() {
                 ) : (
                   <Note>
                     {t(
-                      "Add your complete course history after setup. Quick-start totals are ignored in detailed mode.",
+                      "After setup, add your courses and grades. We will calculate your CGPA from that list.",
                       "সেটআপ শেষে সব কোর্সের তথ্য যোগ করুন। বিস্তারিত মোডে দ্রুত শুরুর মোট তথ্য ব্যবহার হবে না।",
                     )}
                   </Note>
@@ -163,7 +160,7 @@ export default function Setup() {
                 <div className="form-grid">
                   <NumberField
                     label={t(
-                      "Total degree credits (confirm)",
+                      "Credits required for your degree",
                       "ডিগ্রির মোট ক্রেডিট (নিশ্চিত করুন)",
                     )}
                     value={p.degreeCredits}

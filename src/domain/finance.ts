@@ -16,6 +16,8 @@ export function tuition(f: Finance) {
     f.retake,
     f.firstRetake,
     f.termFee,
+    f.gymFee,
+    f.busFee,
     f.other,
     f.paid,
   ].forEach(two);
@@ -36,7 +38,11 @@ export function tuition(f: Finance) {
   const benefit = Math.round(
     (line(f.regular - f.excluded) * hundred(f.waiver)) / 10000,
   );
-  const fees = hundred(f.termFee) + hundred(f.other),
+  const termFee = hundred(f.termFee),
+    gymFee = hundred(f.gymFee),
+    busFee = hundred(f.busFee),
+    otherFees = hundred(f.other),
+    fees = termFee + gymFee + busFee + otherFees,
     total = regular + retake - retakeBenefit - benefit + fees;
   const balance = total - hundred(f.paid);
   const installments = [Math.floor(total * 0.4), Math.floor(total * 0.3)];
@@ -46,6 +52,10 @@ export function tuition(f: Finance) {
     retake,
     retakeBenefit,
     benefit,
+    termFee,
+    gymFee,
+    busFee,
+    otherFees,
     fees,
     total,
     balance,

@@ -130,9 +130,12 @@ it("fee input changes recompute and blank rates never become zero cost", () => {
   fill("Tuition per credit (BDT)", "6500");
   fill("Trimester / semester fee", "6500");
   expect(screen.getByTestId("fee-total")).toHaveTextContent("84,500");
+  fill("Gym / facility fee", "1000");
+  fill("Bus service fee", "2000");
+  expect(screen.getByTestId("fee-total")).toHaveTextContent("87,500");
   fill("Single tuition waiver (%)", "50");
   fill("Non-waivable regular credits", "3");
-  expect(screen.getByTestId("fee-total")).toHaveTextContent("55,250");
+  expect(screen.getByTestId("fee-total")).toHaveTextContent("58,250");
   fill("Tuition per credit (BDT)", "");
   expect(screen.getByTestId("fee-total")).toHaveTextContent("—");
 });
