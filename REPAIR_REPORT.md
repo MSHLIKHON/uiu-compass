@@ -39,8 +39,10 @@ Graduation edits and unsaved calculator drafts are temporary scenarios; use prof
 
 ## GitHub and deployment
 
-Private repository created and verified: https://github.com/MSHLIKHON/uiu-compass.
+Public repository created and verified: https://github.com/MSHLIKHON/uiu-compass.
 
-The release is committed locally. The repository is still empty remotely: final push requires the owner's approval under the supplied brief. No remote-code or GitHub Actions success is claimed before that push. No public deployment was performed.
+The full release is pushed to `main`. GitHub quality checks and the Pages deployment workflow pass for commit `c01521f`.
 
-Cloudflare Pages configuration is prepared: Node 24, `npm run build`, `dist`, branch `main`, repository root, no API keys required. `public/_redirects` supplies SPA fallback; manifest, icons, headers and service worker are included. Connect GitHub and publish only after approval. Then verify the hosted HTTPS deep links, installation, caching and update behavior on real devices.
+Production deployment: https://mshlikhon.github.io/uiu-compass/. The homepage, `#/graduation` deep link, curriculum guide, asset loading, viewport overflow and browser runtime errors were checked after deployment. GitHub Pages uses hash routes because it does not provide SPA rewrites. Local and optional Cloudflare builds retain normal browser routes.
+
+Cloudflare Pages configuration remains prepared: Node 24, `npm run build`, `dist`, branch `main`, repository root, no API keys required. `public/_redirects` supplies SPA fallback; manifest, icons, headers and service worker are included. Cloudflare publication requires Cloudflare account authorization, which was not available in the deployment environment.

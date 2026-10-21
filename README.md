@@ -2,7 +2,7 @@
 
 Live app: https://mshlikhon.github.io/uiu-compass/
 
-**Smart Academic & Financial Navigator** — a private, offline-capable React application for UIU students. Independent of United International University.
+**Smart Academic & Financial Navigator** — a local-first, offline-capable React application for UIU students. Independent of United International University.
 
 A local-first application organized into five primary destinations, with profile onboarding, course history, weighted GPA/CGPA, exact discrete-grade planning, retake combination search, tuition estimates, selected scholarship continuation checks, manual/partial-verified curricula, scenarios, print-to-PDF reports, backups, Bangla/English UI and dark mode.
 
@@ -85,11 +85,13 @@ public/          Icons, SPA redirects, security headers
 
 There are no server calls for student data. The service worker caches only bundled application assets. Student records live in localStorage under `uiu-compass:v1`; backups validate and reconstruct known fields instead of trusting arbitrary properties. Rendering uses React text escaping; imported content is never injected as HTML. Browser storage is not encrypted. It can be lost; shared browser profiles can expose records. Export backups privately.
 
-## Cloudflare Pages via GitHub
+## Deployment
 
-Private repository: https://github.com/MSHLIKHON/uiu-compass. The repair release is prepared locally; the final remote push and any public deployment require owner approval.
+Public repository: https://github.com/MSHLIKHON/uiu-compass. The production site is deployed with GitHub Pages at https://mshlikhon.github.io/uiu-compass/. Pushes to `main` run quality checks and a Pages deployment workflow.
 
-1. The private `MSHLIKHON/uiu-compass` repository has been created. Review the release and decide the license before any public publication.
+### Optional Cloudflare Pages deployment
+
+1. Import the public `MSHLIKHON/uiu-compass` repository in Cloudflare Pages.
 2. Initialize this **app folder**, not its parent project mirror:
 
    ```sh
