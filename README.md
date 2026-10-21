@@ -1,5 +1,7 @@
 # UIU Compass
 
+Live app: https://mshlikhon.github.io/uiu-compass/
+
 **Smart Academic & Financial Navigator** — a private, offline-capable React application for UIU students. Independent of United International University.
 
 A local-first application organized into five primary destinations, with profile onboarding, course history, weighted GPA/CGPA, exact discrete-grade planning, retake combination search, tuition estimates, selected scholarship continuation checks, manual/partial-verified curricula, scenarios, print-to-PDF reports, backups, Bangla/English UI and dark mode.
