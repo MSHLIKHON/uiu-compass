@@ -13,7 +13,13 @@ const Router =
   import.meta.env.BASE_URL === "/uiu-compass/" ? HashRouter : BrowserRouter;
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Router basename={import.meta.env.BASE_URL}>
+    <Router
+      basename={
+        import.meta.env.BASE_URL === "/uiu-compass/"
+          ? undefined
+          : import.meta.env.BASE_URL
+      }
+    >
       <Provider>
         <App />
       </Provider>
