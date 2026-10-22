@@ -554,11 +554,59 @@ input[type="checkbox"] {
   box-shadow: 0 18px 50px rgba(30, 45, 75, 0.12);
   text-align: center;
 }
-.uiu-cover-logo {
-  width: min(250px, 66%);
-  height: auto;
-  margin-bottom: 12px;
-  object-fit: contain;
+.cover-brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: min(100%, 410px);
+  margin: 0 auto 12px;
+  text-align: left;
+}
+.uiu-logo-crop {
+  position: relative;
+  flex: 0 0 84px;
+  width: 84px;
+  height: 76px;
+  overflow: hidden;
+}
+.uiu-logo-crop img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 252px;
+  height: 76px;
+  max-width: none;
+  object-fit: fill;
+}
+.cover-wordmark {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-left: 14px;
+  border-left: 2px solid #ef7622;
+  color: #173d72;
+  line-height: 1.05;
+}
+.cover-wordmark strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(18px, 2.2vw, 27px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.cover-wordmark span {
+  margin-top: 7px;
+  color: #e86f20;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.cover-address {
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 .cover-preview > p {
   margin: 2px 0;

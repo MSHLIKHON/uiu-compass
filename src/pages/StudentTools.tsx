@@ -705,12 +705,22 @@ export default function StudentTools() {
             className={`cover-preview cover-${cover.template.toLowerCase()}`}
             aria-label="Cover page preview"
           >
-            <img
-              className="uiu-cover-logo"
-              src={`${import.meta.env.BASE_URL}assets/uiu-logo.png`}
-              alt="United International University"
-            />
-            <span>United City, Madani Avenue, Dhaka</span>
+            <div className="cover-brand-lockup">
+              <span className="uiu-logo-crop" aria-hidden="true">
+                <img
+                  src={`${import.meta.env.BASE_URL}assets/uiu-logo.png`}
+                  alt=""
+                />
+              </span>
+              <div className="cover-wordmark">
+                <strong>United International</strong>
+                <strong>University</strong>
+                <span>Quest for Excellence</span>
+              </div>
+            </div>
+            <span className="cover-address">
+              United City, Madani Avenue, Dhaka 1212
+            </span>
             <div className="cover-rule" />
             <small>{cover.type.toUpperCase()}</small>
             <h1>{cover.title || `${cover.type} title`}</h1>

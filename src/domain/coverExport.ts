@@ -1,11 +1,16 @@
 import {
   AlignmentType,
+  BorderStyle,
   Document,
   HeadingLevel,
   ImageRun,
   Packer,
   Paragraph,
+  Table,
+  TableCell,
+  TableRow,
   TextRun,
+  WidthType,
 } from "docx";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
@@ -64,13 +69,82 @@ export async function downloadCoverDocx(cover: CoverData) {
       {
         properties: {},
         children: [
-          new Paragraph({
+          new Table({
             alignment: AlignmentType.CENTER,
-            children: [
-              new ImageRun({
-                data: logo,
-                type: "png",
-                transformation: { width: 230, height: 70 },
+            width: { size: 72, type: WidthType.PERCENTAGE },
+            borders: {
+              top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+              insideHorizontal: {
+                style: BorderStyle.NONE,
+                size: 0,
+                color: "FFFFFF",
+              },
+              insideVertical: {
+                style: BorderStyle.SINGLE,
+                size: 8,
+                color: "E87524",
+              },
+            },
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({
+                    width: { size: 33, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({
+                        alignment: AlignmentType.RIGHT,
+                        children: [
+                          new ImageRun({
+                            data: logo,
+                            type: "png",
+                            transformation: { width: 120, height: 36 },
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                  new TableCell({
+                    width: { size: 67, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({
+                        spacing: { after: 0 },
+                        children: [
+                          new TextRun({
+                            text: "UNITED INTERNATIONAL",
+                            bold: true,
+                            color: "173D72",
+                            size: 30,
+                          }),
+                        ],
+                      }),
+                      new Paragraph({
+                        spacing: { before: 0, after: 0 },
+                        children: [
+                          new TextRun({
+                            text: "UNIVERSITY",
+                            bold: true,
+                            color: "173D72",
+                            size: 30,
+                          }),
+                        ],
+                      }),
+                      new Paragraph({
+                        spacing: { before: 40 },
+                        children: [
+                          new TextRun({
+                            text: "QUEST FOR EXCELLENCE",
+                            bold: true,
+                            color: "E87524",
+                            size: 14,
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
               }),
             ],
           }),
@@ -171,10 +245,37 @@ export async function downloadCoverPdf(cover: CoverData, attachment?: File) {
       color,
     });
   };
-  page.drawImage(logo, { x: 177, y: 716, width: 241, height: 73 });
+  page.drawImage(logo, { x: 112, y: 730, width: 132, height: 40 });
+  page.drawLine({
+    start: { x: 176, y: 726 },
+    end: { x: 176, y: 776 },
+    thickness: 1.5,
+    color: orange,
+  });
+  page.drawText("UNITED INTERNATIONAL", {
+    x: 191,
+    y: 757,
+    size: 15,
+    font: bold,
+    color: blue,
+  });
+  page.drawText("UNIVERSITY", {
+    x: 191,
+    y: 738,
+    size: 15,
+    font: bold,
+    color: blue,
+  });
+  page.drawText("QUEST FOR EXCELLENCE", {
+    x: 191,
+    y: 723,
+    size: 7,
+    font: bold,
+    color: orange,
+  });
   centered(
-    "United City, Madani Avenue, Dhaka",
-    690,
+    "United City, Madani Avenue, Dhaka 1212",
+    700,
     10,
     regular,
     rgb(0.35, 0.39, 0.46),
