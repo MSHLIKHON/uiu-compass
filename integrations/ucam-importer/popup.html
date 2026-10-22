@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>UIU Compass Exporter</title>
+    <style>
+      body {
+        width: 310px;
+        margin: 0;
+        padding: 18px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #17304f;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+      p {
+        color: #5d6877;
+      }
+      button {
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        border-radius: 8px;
+        background: #234e8f;
+        color: white;
+        font-weight: 650;
+        cursor: pointer;
+      }
+      #status {
+        min-height: 42px;
+        margin-top: 12px;
+        font-size: 12px;
+      }
+      .privacy {
+        padding: 10px;
+        border-radius: 8px;
+        background: #eef3f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Export UCAM results</h1>
+    <p>
+      Open the Grade/Result page and make the complete result table visible.
+    </p>
+    <button id="export">Extract visible courses</button>
+    <div id="status" role="status"></div>
+    <p class="privacy">
+      Runs locally. It does not read your password or send data to a server.
+    </p>
+    <script src="popup.js"></script>
+  </body>
+</html>

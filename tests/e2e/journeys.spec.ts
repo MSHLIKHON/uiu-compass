@@ -148,16 +148,19 @@ test("fee breakdown validates allocations and stores plan", async ({
 });
 test("backup import is validated and confirmation-gated", async ({ page }) => {
   await page.goto("/settings");
-  await page.locator("input[type=file]").setInputFiles({
-    name: "backup.json",
-    mimeType: "application/json",
-    buffer: Buffer.from(
-      JSON.stringify({
-        ...initial,
-        profile: { ...initial.profile, batch: "Fall 2025", ready: true },
-      }),
-    ),
-  });
+  await page
+    .locator("input[type=file]")
+    .first()
+    .setInputFiles({
+      name: "backup.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(
+        JSON.stringify({
+          ...initial,
+          profile: { ...initial.profile, batch: "Fall 2025", ready: true },
+        }),
+      ),
+    });
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button", { name: "Replace data" }).click();
   expect(
@@ -165,14 +168,58 @@ test("backup import is validated and confirmation-gated", async ({ page }) => {
       () => JSON.parse(localStorage.getItem("uiu-compass:v1")!).profile.batch,
     ),
   ).toBe("Fall 2025");
-  await page.locator("input[type=file]").setInputFiles({
-    name: "bad.json",
-    mimeType: "application/json",
-    buffer: Buffer.from('{"version":99}'),
-  });
+  await page
+    .locator("input[type=file]")
+    .first()
+    .setInputFiles({
+      name: "bad.json",
+      mimeType: "application/json",
+      buffer: Buffer.from('{"version":99}'),
+    });
   await expect(page.getByRole("alert")).toContainText(
     "Unsupported backup version",
   );
+});
+test("UCAM result import validates rows and skips duplicate attempts", async ({
+  page,
+}) => {
+  await page.goto("/settings");
+  const ucamExport = {
+    format: "uiu-compass-ucam-v1",
+    exportedAt: "2026-10-23T00:00:00.000Z",
+    courses: [
+      {
+        code: "CSE 1111",
+        title: "Introduction to Computer Systems",
+        credits: 3,
+        grade: "A",
+        term: "Fall 2026",
+        attempt: 1,
+      },
+    ],
+  };
+  const file = {
+    name: "uiu-compass-ucam.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(ucamExport)),
+  };
+  await page.locator('input[type="file"]').nth(1).setInputFiles(file);
+  await expect(
+    page.getByRole("heading", { name: "Import UCAM courses?" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Import courses" }).click();
+  expect(
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem("uiu-compass:v1")!).courses.length,
+    ),
+  ).toBe(1);
+  await page.locator('input[type="file"]').nth(1).setInputFiles(file);
+  await page.getByRole("button", { name: "Import courses" }).click();
+  expect(
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem("uiu-compass:v1")!).courses.length,
+    ),
+  ).toBe(1);
 });
 test("manifest and service worker support offline calculator reload", async ({
   page,

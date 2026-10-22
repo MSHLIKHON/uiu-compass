@@ -1,15 +1,20 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Download, Upload, Trash2 } from "lucide-react";
+import { Download, Upload, Trash2, Chrome, ShieldCheck } from "lucide-react";
 import { useApp } from "../state/AppState";
 import { downloadJSON, validateData, initial } from "../state/storage";
 import type { StudentData } from "../domain/types";
+import type { Course } from "../domain/types";
+import { mergeUcamCourses, parseUcamImport } from "../domain/ucamImport";
 import { Card, Heading, Field, Note, ResultError } from "../components/ui";
 export default function Settings() {
   const { data, update, replace, t, notify } = useApp();
   const file = useRef<HTMLInputElement>(null);
+  const ucamFile = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<StudentData | null>(null),
-    [error, setError] = useState(""),
+    [pendingUcam, setPendingUcam] = useState<Course[] | null>(null),
+    [backupError, setBackupError] = useState(""),
+    [ucamError, setUcamError] = useState(""),
     [confirmDelete, setConfirmDelete] = useState(false);
   return (
     <>
@@ -89,18 +94,79 @@ export default function Settings() {
                 if (f.size > 2_000_000)
                   throw new Error("Backup must be under 2 MB.");
                 setPending(validateData(JSON.parse(await f.text())));
-                setError("");
+                setBackupError("");
               } catch (err) {
-                setError(
+                setBackupError(
                   err instanceof Error ? err.message : "Invalid backup.",
                 );
               }
               e.target.value = "";
             }}
           />
-          <ResultError message={error} />
+          <ResultError message={backupError} />
         </Card>
       </div>
+      <Card className="ucam-import-card">
+        <div className="section-title">
+          <div>
+            <div className="step-label">
+              <Chrome size={16} /> {t("UCAM IMPORT", "UCAM ইম্পোর্ট")}
+            </div>
+            <h2>
+              {t(
+                "Bring in your visible result table",
+                "দেখা যাচ্ছে এমন result table ইম্পোর্ট করুন",
+              )}
+            </h2>
+          </div>
+          <ShieldCheck size={28} aria-hidden="true" />
+        </div>
+        <p>
+          {t(
+            "Use the included Chrome extension or bookmarklet on your UCAM Grade/Result page. It reads only the visible table and downloads a local JSON file; your UCAM password is never read or sent to UIU Compass.",
+            "UCAM Grade/Result page-এ Chrome extension বা bookmarklet ব্যবহার করুন। এটি শুধু দেখা যাচ্ছে এমন table পড়ে local JSON file বানায়; UCAM password পড়ে না বা UIU Compass-এ পাঠায় না।",
+          )}
+        </p>
+        <div className="actions">
+          <button className="button" onClick={() => ucamFile.current?.click()}>
+            <Upload size={16} />
+            {t("Import UCAM result JSON", "UCAM result JSON ইম্পোর্ট")}
+          </button>
+          <a
+            className="secondary"
+            href="https://github.com/MSHLIKHON/uiu-compass/tree/main/integrations/ucam-importer"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Chrome size={16} />
+            {t("Get extractor", "Extractor নিন")}
+          </a>
+        </div>
+        <input
+          ref={ucamFile}
+          type="file"
+          accept=".json,application/json"
+          hidden
+          onChange={async (event) => {
+            const selected = event.target.files?.[0];
+            if (!selected) return;
+            try {
+              if (selected.size > 1_000_000)
+                throw new Error("UCAM import must be under 1 MB.");
+              setPendingUcam(
+                parseUcamImport(JSON.parse(await selected.text())),
+              );
+              setUcamError("");
+            } catch (cause) {
+              setUcamError(
+                cause instanceof Error ? cause.message : "Invalid UCAM import.",
+              );
+            }
+            event.target.value = "";
+          }}
+        />
+        <ResultError message={ucamError} />
+      </Card>
       <Card>
         <h2>{t("Privacy by default", "আপনার গোপনীয়তা আগে")}</h2>
         <Note>
@@ -114,7 +180,7 @@ export default function Settings() {
           {t("Delete all local data", "সব স্থানীয় তথ্য মুছুন")}
         </button>
       </Card>
-      {(pending || confirmDelete) && (
+      {(pending || pendingUcam || confirmDelete) && (
         <div className="modal-backdrop">
           <div
             className="modal"
@@ -125,12 +191,16 @@ export default function Settings() {
             <h2 id="confirm-title">
               {pending
                 ? t("Replace saved data?", "সংরক্ষিত তথ্য বদলাবেন?")
-                : t("Delete all saved data?", "সব সংরক্ষিত তথ্য মুছবেন?")}
+                : pendingUcam
+                  ? t("Import UCAM courses?", "UCAM কোর্স ইম্পোর্ট করবেন?")
+                  : t("Delete all saved data?", "সব সংরক্ষিত তথ্য মুছবেন?")}
             </h2>
             <p>
               {pending
                 ? `${pending.courses.length} courses, ${pending.scenarios.length} scenarios. Your existing local data will be replaced.`
-                : "This clears your profile, academic records, fee plan and saved scenarios. Export a backup first if needed."}
+                : pendingUcam
+                  ? `${pendingUcam.length} validated course rows are ready. Existing matching course attempts will be skipped.`
+                  : "This clears your profile, academic records, fee plan and saved scenarios. Export a backup first if needed."}
             </p>
             <div className="actions">
               <button
@@ -138,14 +208,27 @@ export default function Settings() {
                 className="secondary"
                 onClick={() => {
                   setPending(null);
+                  setPendingUcam(null);
                   setConfirmDelete(false);
                 }}
               >
                 {t("Cancel", "বাতিল")}
               </button>
               <button
-                className="danger"
+                className={pendingUcam ? "button" : "danger"}
                 onClick={() => {
+                  if (pendingUcam) {
+                    const result = mergeUcamCourses(data.courses, pendingUcam);
+                    update((current) => ({
+                      ...current,
+                      courses: result.courses,
+                    }));
+                    setPendingUcam(null);
+                    notify(
+                      `${result.added} UCAM courses imported; duplicates skipped.`,
+                    );
+                    return;
+                  }
                   replace(pending ?? structuredClone(initial));
                   setPending(null);
                   setConfirmDelete(false);
@@ -154,7 +237,9 @@ export default function Settings() {
               >
                 {pending
                   ? t("Replace data", "তথ্য বদলান")
-                  : t("Delete everything", "সব মুছুন")}
+                  : pendingUcam
+                    ? t("Import courses", "কোর্স ইম্পোর্ট")
+                    : t("Delete everything", "সব মুছুন")}
               </button>
             </div>
           </div>

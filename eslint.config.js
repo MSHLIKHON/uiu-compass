@@ -8,6 +8,7 @@ export default ts.config(
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",
+      "integrations/ucam-importer/bookmarklet.js",
     ],
   },
   js.configs.recommended,

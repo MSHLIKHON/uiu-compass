@@ -36,7 +36,8 @@ export default function Graduation() {
     [load, setLoad] = useState(data.profile.load),
     [error, setError] = useState(""),
     [graduation, setGraduation] = useState(""),
-    [futureGpa, setFutureGpa] = useState(3.67);
+    [futureGpa, setFutureGpa] = useState(3.67),
+    [checkCode, setCheckCode] = useState("");
   const set = <K extends keyof Requirement>(k: K, v: Requirement[K]) =>
     setR({ ...r, [k]: v });
   const s = summary(data);
@@ -49,6 +50,44 @@ export default function Graduation() {
   const plan = calculate(() =>
     curriculumPlan(data.requirements, data.courses, load),
   );
+  const checkedRequirement = data.requirements.find(
+    (requirement) => requirement.code === checkCode,
+  );
+  const missingPrerequisites =
+    checkedRequirement?.prerequisites.filter(
+      (code) => !plan.result?.completed.has(code),
+    ) ?? [];
+  const trackProgress = [
+    ...new Set(
+      data.requirements
+        .filter(
+          (requirement) =>
+            requirement.selected && requirement.electiveGroup.trim(),
+        )
+        .map((requirement) => requirement.electiveGroup.trim()),
+    ),
+  ].map((name) => {
+    const requirements = data.requirements.filter(
+      (requirement) =>
+        requirement.selected && requirement.electiveGroup.trim() === name,
+    );
+    const completed = requirements.filter((requirement) =>
+      plan.result?.completed.has(requirement.code),
+    );
+    return {
+      name,
+      completed: completed.length,
+      total: requirements.length,
+      earnedCredits: completed.reduce(
+        (sum, requirement) => sum + requirement.credits,
+        0,
+      ),
+      totalCredits: requirements.reduce(
+        (sum, requirement) => sum + requirement.credits,
+        0,
+      ),
+    };
+  });
   const remainingResult = calculate(() => {
     if (
       !Number.isFinite(degree) ||
@@ -237,7 +276,10 @@ export default function Graduation() {
                   />
                 </Field>
                 <Field
-                  label={t("Elective group (optional)", "ঐচ্ছিক কোর্সের গ্রুপ")}
+                  label={t(
+                    "Major / minor / track (optional)",
+                    "মেজর / মাইনর / ট্র্যাক (ঐচ্ছিক)",
+                  )}
                 >
                   <input
                     value={r.electiveGroup}
@@ -408,6 +450,90 @@ export default function Graduation() {
             )}
           </p>
         </div>
+        <Card className="prerequisite-checker">
+          <div className="step-label">
+            {t("PREREQUISITE CHECKER", "প্রি-রিকুইজিট চেকার")}
+          </div>
+          <h2>
+            {t("Can I register for this course?", "এই কোর্সটি কি নিতে পারব?")}
+          </h2>
+          <Field label={t("Choose a loaded course", "তালিকা থেকে কোর্স বাছুন")}>
+            <select
+              value={checkCode}
+              onChange={(event) => setCheckCode(event.target.value)}
+            >
+              <option value="">{t("Select course", "কোর্স বাছুন")}</option>
+              {data.requirements
+                .filter((requirement) => requirement.selected)
+                .map((requirement) => (
+                  <option value={requirement.code} key={requirement.id}>
+                    {requirement.code} · {requirement.title}
+                  </option>
+                ))}
+            </select>
+          </Field>
+          {checkedRequirement && (
+            <div
+              className={`eligibility-result ${missingPrerequisites.length ? "blocked" : "ready"}`}
+            >
+              <strong>
+                {missingPrerequisites.length
+                  ? t("Prerequisites still missing", "প্রি-রিকুইজিট এখনও বাকি")
+                  : t(
+                      "Recorded prerequisites completed",
+                      "রেকর্ড করা প্রি-রিকুইজিট সম্পন্ন",
+                    )}
+              </strong>
+              <span>
+                {checkedRequirement.prerequisites.length
+                  ? missingPrerequisites.length
+                    ? missingPrerequisites.join(", ")
+                    : checkedRequirement.prerequisites.join(", ")
+                  : t(
+                      "No prerequisite is recorded for this course.",
+                      "এই কোর্সের কোনো prerequisite রেকর্ড করা নেই।",
+                    )}
+              </span>
+            </div>
+          )}
+          {!data.requirements.length && (
+            <p className="caption">
+              {t(
+                "Add or load curriculum requirements first.",
+                "আগে curriculum requirement যোগ বা load করুন।",
+              )}
+            </p>
+          )}
+        </Card>
+        {!!trackProgress.length && (
+          <Card>
+            <h2>
+              {t(
+                "Major, minor & track progress",
+                "মেজর, মাইনর ও ট্র্যাক অগ্রগতি",
+              )}
+            </h2>
+            <div className="track-progress-grid">
+              {trackProgress.map((track) => (
+                <article key={track.name}>
+                  <div>
+                    <strong>{track.name}</strong>
+                    <span>
+                      {track.completed}/{track.total} courses
+                    </span>
+                  </div>
+                  <progress
+                    value={track.earnedCredits}
+                    max={track.totalCredits || 1}
+                  />
+                  <small>
+                    {track.earnedCredits} / {track.totalCredits} credits passed
+                  </small>
+                </article>
+              ))}
+            </div>
+          </Card>
+        )}
         <Card>
           <h2>{t("Your curriculum checklist", "আপনার পাঠ্যক্রমের তালিকা")}</h2>
           <p className="caption">
@@ -422,7 +548,7 @@ export default function Graduation() {
                   <th>Include</th>
                   <th>Course</th>
                   <th>Credits</th>
-                  <th>Category / elective group</th>
+                  <th>Category / major-minor-track</th>
                   <th>Prerequisites</th>
                   <th>Status</th>
                   <th>Remove</th>

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "UIU Compass UCAM Result Exporter",
+  "version": "1.0.0",
+  "description": "Export the visible UCAM result table to a local UIU Compass JSON file.",
+  "permissions": ["activeTab", "downloads"],
+  "host_permissions": ["https://ucam.uiu.ac.bd/*"],
+  "action": {
+    "default_title": "Export to UIU Compass",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://ucam.uiu.ac.bd/*"],
+      "js": ["extract.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
