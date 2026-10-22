@@ -41,6 +41,7 @@ test("all routes render without exceptions or viewport overflow", async ({
     "/reports",
     "/settings",
     "/policies",
+    "/tools",
   ]) {
     await page.goto(route);
     await expect(page.locator("h1").first()).toBeVisible();
@@ -98,10 +99,12 @@ test("course history, edit, and discrete target scenario", async ({ page }) => {
     page.getByRole("cell", { name: "COURSE 1", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Edit COURSE 1" }).click();
-  await page.getByLabel("Credits", { exact: true }).fill("1.5");
+  await page
+    .getByRole("combobox", { name: "Course credit", exact: true })
+    .selectOption("2");
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(
-    page.getByRole("cell", { name: "1.5", exact: true }),
+    page.getByRole("cell", { name: "2", exact: true }),
   ).toBeVisible();
   await page.goto("/target");
   await page.getByLabel("Current CGPA", { exact: true }).fill("2");
@@ -347,4 +350,31 @@ test("curriculum planner explains its inputs and sequence limits", async ({
   await expect(
     page.getByText(/only the requirements currently loaded below/),
   ).toBeVisible();
+});
+
+test("exam routine accepts and combines multiple selected courses", async ({
+  page,
+}) => {
+  await page.goto("/tools");
+  for (const [course, day, time] of [
+    ["CSE 1111", "Sunday", "10:00 AM"],
+    ["MAT 1101", "Monday", "2:00 PM"],
+  ]) {
+    await page.getByLabel("Course code or name").fill(course);
+    await page.getByLabel("Day / date").fill(day);
+    await page.getByLabel("Time", { exact: true }).fill(time);
+    await page.getByRole("button", { name: "Add to routine" }).click();
+  }
+  await expect(page.locator(".schedule-card")).toHaveCount(2);
+  await page.getByLabel("Search saved courses").fill("MAT");
+  await expect(
+    page.getByText("MAT 1101", { exact: true }).first(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Cover page" }).click();
+  await expect(page.getByLabel("Cover page preview")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+    ),
+  ).toBe(true);
 });

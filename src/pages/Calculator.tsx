@@ -28,6 +28,19 @@ const blank = (): Course => ({
   category: "core",
   excluded: false,
 });
+const UIU_GRADING = [
+  ["A", "4.00", "90–100", "Outstanding"],
+  ["A-", "3.67", "86–89", "Excellent"],
+  ["B+", "3.33", "82–85", "Very good"],
+  ["B", "3.00", "78–81", "Good"],
+  ["B-", "2.67", "74–77", "Above average"],
+  ["C+", "2.33", "70–73", "Average"],
+  ["C", "2.00", "66–69", "Below average"],
+  ["C-", "1.67", "62–65", "Poor"],
+  ["D+", "1.33", "58–61", "Very poor"],
+  ["D", "1.00", "55–57", "Pass"],
+  ["F", "0.00", "0–54", "Fail"],
+] as const;
 export default function Calculator() {
   const { data, update, t, notify } = useApp();
   const [draft, setDraft] = useState(blank);
@@ -114,19 +127,44 @@ export default function Calculator() {
           {t("Detailed history", "বিস্তারিত ইতিহাস")}
         </button>
       </div>
-      <Advanced title={t("How CGPA is calculated", "গ্রেড কীভাবে গণনা হয়")}>
+      <Advanced
+        title={t(
+          "UIU grading policy & CGPA formula",
+          "UIU গ্রেডিং নীতি ও সিজিপিএ সূত্র",
+        )}
+      >
         <Note>
           {t(
             "Each grade has a point value. We multiply it by the course credits, add the results, then divide by the counted credits. F adds zero points. I and W are left out of estimates. For a repeated course, choose a rule in the Retake planner.",
             "F এর পয়েন্ট শূন্য, ক্রেডিট অর্জিত হয় না। I/W এর গণনার নিয়ম নিশ্চিত নয় বলে পূর্বাভাস থেকে বাদ রাখা হয়। একই কোর্সের একাধিক চেষ্টার জন্য রিটেক প্ল্যানারে নিয়ম বেছে নিন।",
           )}
         </Note>
+        <div className="grade-policy-grid" aria-label="UIU grading policy">
+          {UIU_GRADING.map(([grade, point, marks, meaning]) => (
+            <div className="grade-policy-row" key={grade}>
+              <strong>{grade}</strong>
+              <span>{point}</span>
+              <span>{marks}%</span>
+              <small>{meaning}</small>
+            </div>
+          ))}
+        </div>
+        <p className="caption policy-source-line">
+          {t("Source: ", "উৎস: ")}
+          <a
+            href="https://www.uiu.ac.bd/academics/grading-performance-evaluation/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("Official UIU grading policy", "অফিসিয়াল UIU গ্রেডিং নীতি")}
+          </a>
+        </p>
       </Advanced>
       <div className="two-col">
         <Card>
           <h2>
             {t(
-              editing ? "Edit course" : "Add a course",
+              editing ? "Edit course" : "Add your grades",
               editing ? "কোর্স সম্পাদনা" : "কোর্স যোগ করুন",
             )}
           </h2>
@@ -199,13 +237,18 @@ export default function Calculator() {
             }}
           >
             <div className="form-grid">
-              <NumberField
-                label={t("Credits", "ক্রেডিট")}
-                value={draft.credits}
-                min={0.01}
-                max={100}
-                onChange={(n) => set("credits", n)}
-              />
+              <Field label={t("Course credit", "কোর্স ক্রেডিট")}>
+                <select
+                  value={draft.credits}
+                  onChange={(e) => set("credits", Number(e.target.value))}
+                >
+                  {[1, 2, 3, 4, 5, 6].map((credit) => (
+                    <option value={credit} key={credit}>
+                      {credit} {credit === 1 ? "credit" : "credits"}
+                    </option>
+                  ))}
+                </select>
+              </Field>
               <Field label={t("Grade", "গ্রেড")}>
                 <select
                   value={draft.grade}
@@ -291,7 +334,7 @@ export default function Calculator() {
               </div>
             </Advanced>
             <ResultError message={error} />
-            <div className="actions">
+            <div className="actions calculator-actions">
               <button className="button">
                 <Plus size={16} />
                 {t(
@@ -314,17 +357,19 @@ export default function Calculator() {
               )}
             </div>
           </form>
-          <button
-            className="secondary"
-            onClick={() => {
-              setDraft({ ...blank(), term });
-              setDraftActive(false);
-              setEditing(false);
-              setError("");
-            }}
-          >
-            {t("Reset unsaved course", "সংরক্ষণ না করা তথ্য মুছুন")}
-          </button>
+          <div className="calculator-reset-row">
+            <button
+              className="secondary"
+              onClick={() => {
+                setDraft({ ...blank(), term });
+                setDraftActive(false);
+                setEditing(false);
+                setError("");
+              }}
+            >
+              {t("Clear current entry", "বর্তমান তথ্য মুছুন")}
+            </button>
+          </div>
         </Card>
         <Card>
           <div className="section-title">
@@ -401,6 +446,44 @@ export default function Calculator() {
               "ফলাফল ২ দশমিক পর্যন্ত দেখানো হয়। দ্রুত মোডে নির্বাচিত টার্মের সব কোর্স নতুন হিসেবে ধরা হয়।",
             )}
           </small>
+          <div className="selected-grades">
+            <div className="section-title">
+              <div>
+                <h3>{t("Selected grades", "নির্বাচিত গ্রেড")}</h3>
+                <p>
+                  {t("Courses included in this result", "এই ফলে থাকা কোর্স")}
+                </p>
+              </div>
+              <Badge>
+                {preview.filter((course) => course.term === term).length}{" "}
+                {t("COURSES", "কোর্স")}
+              </Badge>
+            </div>
+            {preview
+              .filter((course) => course.term === term)
+              .map((course, index) => (
+                <div className="selected-grade-row" key={course.id}>
+                  <span className="course-number">{index + 1}</span>
+                  <div>
+                    <strong>{course.code || `Course ${index + 1}`}</strong>
+                    <small>
+                      {course.title || `${course.credits} credit course`}
+                    </small>
+                  </div>
+                  <Badge tone={course.grade === "F" ? "amber" : "blue"}>
+                    {course.grade} · {gradePoint(course.grade) ?? "—"}
+                  </Badge>
+                </div>
+              ))}
+            {!preview.filter((course) => course.term === term).length && (
+              <p className="caption">
+                {t(
+                  "Choose a credit and grade to preview a course here.",
+                  "ক্রেডিট ও গ্রেড বাছাই করলে কোর্স এখানে দেখাবে।",
+                )}
+              </p>
+            )}
+          </div>
         </Card>
       </div>
       <Advanced title={t("Saved record summary", "সংরক্ষিত তথ্যের সারাংশ")}>

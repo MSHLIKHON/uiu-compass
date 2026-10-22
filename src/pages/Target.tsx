@@ -16,6 +16,16 @@ import {
   Badge,
   Advanced,
 } from "../components/ui";
+const PROGRAM_CREDITS: Record<string, number> = {
+  CSE: 137,
+  EEE: 140,
+  BBA: 125,
+  Civil: 151.5,
+  English: 123,
+  Pharmacy: 160,
+  "Data Science": 138,
+  Economics: 122,
+};
 export default function Target() {
   const { data, update, t, notify } = useApp(),
     s = summary(data);
@@ -30,6 +40,13 @@ export default function Target() {
         : Number.NaN,
     ),
     [target, setTarget] = useState(data.profile.target);
+  const initialProgram = Object.hasOwn(PROGRAM_CREDITS, data.profile.program)
+    ? data.profile.program
+    : "CSE";
+  const [program, setProgram] = useState(initialProgram);
+  const [degreeCredits, setDegreeCredits] = useState(
+    data.profile.degreeCredits || PROGRAM_CREDITS[initialProgram],
+  );
   const [terms, setTerms] = useState([
     { credits: data.profile.load, gpa: 3.67 },
   ]);
@@ -43,6 +60,9 @@ export default function Target() {
     setError("");
   }, [cgpa, credits, target]);
   const remaining = terms.reduce((sum, x) => sum + x.credits, 0);
+  const degreeRemaining = Number.isFinite(credits)
+    ? Math.max(0, degreeCredits - credits)
+    : degreeCredits;
   const calc = calculate(() => ({
     plan: targetPlan(cgpa, credits, target, remaining),
     final: project(cgpa, credits, terms),
@@ -73,6 +93,22 @@ export default function Target() {
           </div>
           <h2>{t("Starting point", "শুরুর তথ্য")}</h2>
           <div className="form-grid">
+            <Field label={t("Program", "প্রোগ্রাম")}>
+              <select
+                value={program}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  setProgram(next);
+                  setDegreeCredits(PROGRAM_CREDITS[next]);
+                }}
+              >
+                {Object.entries(PROGRAM_CREDITS).map(([name, total]) => (
+                  <option value={name} key={name}>
+                    {name} · {total} credits
+                  </option>
+                ))}
+              </select>
+            </Field>
             <NumberField
               label={t("Current CGPA", "বর্তমান সিজিপিএ")}
               value={cgpa}
@@ -91,18 +127,45 @@ export default function Target() {
               max={4}
               onChange={setTarget}
             />
+            <NumberField
+              label={t("Degree credits", "ডিগ্রির মোট ক্রেডিট")}
+              value={degreeCredits}
+              max={300}
+              onChange={setDegreeCredits}
+            />
           </div>
-          <button
-            className="secondary"
-            onClick={() => {
-              setCgpa(Number.NaN);
-              setCredits(Number.NaN);
-              setTarget(data.profile.target);
-              setTerms([{ credits: data.profile.load, gpa: 3.67 }]);
-            }}
-          >
-            {t("Reset inputs", "তথ্য নতুন করে দিন")}
-          </button>
+          <div className="goal-actions">
+            <button
+              className="button"
+              disabled={!Number.isFinite(credits) || degreeRemaining <= 0}
+              onClick={() => {
+                const load = Math.max(1, data.profile.load || 12);
+                const count = Math.ceil(degreeRemaining / load);
+                setTerms(
+                  Array.from({ length: count }, (_, index) => ({
+                    credits: Math.min(load, degreeRemaining - index * load),
+                    gpa: 3.67,
+                  })),
+                );
+              }}
+            >
+              {t(
+                `Plan remaining ${Number.isFinite(degreeRemaining) ? degreeRemaining : "—"} credits`,
+                "বাকি ক্রেডিট পরিকল্পনা করুন",
+              )}
+            </button>
+            <button
+              className="secondary"
+              onClick={() => {
+                setCgpa(Number.NaN);
+                setCredits(Number.NaN);
+                setTarget(data.profile.target);
+                setTerms([{ credits: data.profile.load, gpa: 3.67 }]);
+              }}
+            >
+              {t("Reset inputs", "তথ্য নতুন করে দিন")}
+            </button>
+          </div>
           <h3>{t("Your future terms", "ভবিষ্যতের টার্মগুলো")}</h3>
           {terms.map((term, i) => (
             <div className="plan-row" key={i}>

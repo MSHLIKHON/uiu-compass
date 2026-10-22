@@ -16,6 +16,7 @@ import {
   Globe,
   Home,
   CheckCircle2,
+  Wrench,
 } from "lucide-react";
 import { useApp } from "./state/AppState";
 import { PWA } from "./components/PWA";
@@ -33,6 +34,7 @@ const Scenarios = lazy(() => import("./pages/Scenarios"));
 const Reports = lazy(() => import("./pages/Reports"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
 const Policies = lazy(() => import("./pages/Policies"));
+const StudentTools = lazy(() => import("./pages/StudentTools"));
 const nav = [
   {
     to: "/dashboard",
@@ -54,7 +56,14 @@ const nav = [
     bn: "গ্র্যাজুয়েশন",
     icon: GraduationCap,
   },
+  {
+    to: "/tools",
+    en: "Student Tools",
+    bn: "শিক্ষার্থী টুলস",
+    icon: Wrench,
+  },
 ];
+const mobileNav = nav.filter((item) => item.to !== "/tools");
 export default function App() {
   const { data, update, t, notice, storageError } = useApp();
   const [open, setOpen] = useState(false);
@@ -251,6 +260,7 @@ export default function App() {
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/policies" element={<Policies />} />
+              <Route path="/tools" element={<StudentTools />} />
               <Route
                 path="*"
                 element={
@@ -265,6 +275,7 @@ export default function App() {
             </Routes>
           </Suspense>
           <div className="utility-links">
+            <Link to="/tools">{t("Exam routine & cover", "রুটিন ও কভার")}</Link>
             <Link to="/reports">{t("Reports & PDF", "রিপোর্ট ও পিডিএফ")}</Link>
             <Link to="/scenarios">
               {t("Saved plans", "সংরক্ষিত পরিকল্পনা")}
@@ -288,7 +299,7 @@ export default function App() {
         </main>
       </div>
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-        {nav.map((x) => (
+        {mobileNav.map((x) => (
           <Link
             key={x.to}
             className={primaryPath === x.to ? "active" : ""}
