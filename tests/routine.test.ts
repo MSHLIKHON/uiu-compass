@@ -4,6 +4,12 @@ import {
   sortRoutine,
   type RoutineEntry,
 } from "../src/domain/routine";
+import {
+  FINAL_TIMES,
+  MID_TIMES,
+  findFall2026Course,
+  normalizeCourseCode,
+} from "../src/data/cseFall2026";
 
 const entry = (
   id: string,
@@ -18,6 +24,32 @@ const entry = (
   section: "A",
   exam: "Final",
   room: "",
+});
+
+describe("official Fall 2026 lookup", () => {
+  it("normalizes and finds the official day and slot", () => {
+    expect(normalizeCourseCode("  cse   1111 ")).toBe("CSE 1111");
+    expect(findFall2026Course("cse 1111")).toMatchObject({
+      day: 4,
+      slot: "T2",
+    });
+    expect(findFall2026Course("CSE 4509")).toMatchObject({
+      day: 1,
+      slot: "T1",
+    });
+  });
+
+  it("keeps the official mid and final T3 times distinct", () => {
+    expect(MID_TIMES.T3).toBe("2:00–4:00 PM");
+    expect(FINAL_TIMES.T3).toBe("2:30–4:30 PM");
+  });
+
+  it("marks lab courses without a central written slot", () => {
+    expect(findFall2026Course("CSE 1112")).toMatchObject({
+      day: null,
+      slot: null,
+    });
+  });
 });
 
 describe("exam routine helpers", () => {

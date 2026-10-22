@@ -311,6 +311,43 @@ input[type="checkbox"] {
 .goal-actions button {
   justify-content: center;
 }
+.full-span {
+  grid-column: 1 / -1;
+  margin-top: -8px;
+}
+.quick-course-list {
+  display: grid;
+  gap: 12px;
+  margin: 8px 0 14px;
+}
+.quick-course-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.quick-course-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.quick-course-title .icon-button {
+  color: var(--danger);
+}
+.quick-course-card .field {
+  margin-bottom: 0;
+}
+.quick-course-actions,
+.cover-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.quick-course-actions button,
+.cover-actions button {
+  justify-content: center;
+}
 .tool-switch {
   max-width: 520px;
   margin-bottom: 24px;
@@ -323,6 +360,47 @@ input[type="checkbox"] {
 }
 .routine-layout {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+.official-match {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin: -4px 0 18px;
+  border: 1px solid #cbddef;
+  border-radius: 10px;
+  background: #f3f8fd;
+}
+.official-match > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+.official-match > div:first-child > span,
+.official-match small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.official-slot {
+  text-align: right;
+}
+.official-slot b,
+.official-slot span {
+  display: block;
+}
+.official-slot b {
+  color: var(--blue);
+}
+.official-slot span {
+  font-size: 13px;
+}
+.muted-match {
+  border-color: var(--line);
+  background: var(--soft);
+}
+.source-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .full-button {
   width: 100%;
@@ -409,6 +487,59 @@ input[type="checkbox"] {
   align-items: start;
   gap: 24px;
 }
+.document-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.document-type-grid button {
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+.document-type-grid button.selected {
+  border-color: var(--blue);
+  background: var(--soft);
+  color: var(--blue);
+  font-weight: 600;
+}
+.compact-segment {
+  margin-bottom: 16px;
+}
+.compact-segment button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.cover-form h3 {
+  padding-top: 14px;
+  margin: 8px 0 2px;
+  border-top: 1px solid var(--line);
+}
+.field textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+}
+.cover-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 12px;
+}
+.cover-actions .reset-cover {
+  grid-column: 1 / -1;
+}
 .cover-preview {
   aspect-ratio: 210 / 297;
   display: flex;
@@ -423,18 +554,11 @@ input[type="checkbox"] {
   box-shadow: 0 18px 50px rgba(30, 45, 75, 0.12);
   text-align: center;
 }
-.cover-mark {
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 18px;
-  border-radius: 22px;
-  background: #28549a;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 1px;
+.uiu-cover-logo {
+  width: min(250px, 66%);
+  height: auto;
+  margin-bottom: 12px;
+  object-fit: contain;
 }
 .cover-preview > p {
   margin: 2px 0;
@@ -492,6 +616,32 @@ input[type="checkbox"] {
 .cover-people span {
   color: #647087;
   font-size: 13px;
+}
+.cover-index {
+  width: 82%;
+  max-height: 130px;
+  margin: 18px auto;
+  overflow: hidden;
+  text-align: left;
+  font-size: 12px;
+  color: #4e596c;
+}
+.cover-modern {
+  border-top: 10px solid #e96f24;
+}
+.cover-minimal .cover-rule {
+  width: 28%;
+}
+.cover-professional {
+  border-top: 10px solid #173d72;
+}
+.cover-creative {
+  background: linear-gradient(145deg, #fff 0 68%, #f4f8fc 68%);
+}
+.cover-elegant {
+  border: 2px solid #173d72;
+  outline: 1px solid #e96f24;
+  outline-offset: -12px;
 }
 .hint {
   display: none;
@@ -944,6 +1094,12 @@ th {
 [data-theme="dark"] .live-label {
   color: #9ed6b8;
 }
+[data-theme="dark"] .official-match,
+[data-theme="dark"] .quick-course-card,
+[data-theme="dark"] .document-type-grid button {
+  background: var(--panel);
+  border-color: var(--line);
+}
 @media (max-width: 1200px) {
   .cover-workspace {
     grid-template-columns: 1fr;
@@ -1096,8 +1252,13 @@ th {
   }
   .calculator-actions,
   .goal-actions,
+  .quick-course-actions,
+  .cover-actions,
   .grade-policy-grid {
     grid-template-columns: 1fr;
+  }
+  .cover-actions .reset-cover {
+    grid-column: auto;
   }
   .routine-layout {
     grid-template-columns: 1fr;
@@ -1107,6 +1268,12 @@ th {
   }
   .schedule-when {
     grid-column: 2;
+    text-align: left;
+  }
+  .official-match {
+    grid-template-columns: 1fr;
+  }
+  .official-slot {
     text-align: left;
   }
   .cover-preview {

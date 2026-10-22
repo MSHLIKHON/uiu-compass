@@ -91,6 +91,7 @@ test("onboarding persists, theme and Bangla work", async ({
 test("course history, edit, and discrete target scenario", async ({ page }) => {
   await seed(page);
   await page.goto("/calculator");
+  await page.getByRole("button", { name: "Detailed history" }).click();
   await page
     .getByRole("combobox", { name: "Grade", exact: true })
     .selectOption("A-");
@@ -356,19 +357,15 @@ test("exam routine accepts and combines multiple selected courses", async ({
   page,
 }) => {
   await page.goto("/tools");
-  for (const [course, day, time] of [
-    ["CSE 1111", "Sunday", "10:00 AM"],
-    ["MAT 1101", "Monday", "2:00 PM"],
-  ]) {
-    await page.getByLabel("Course code or name").fill(course);
-    await page.getByLabel("Day / date").fill(day);
-    await page.getByLabel("Time", { exact: true }).fill(time);
-    await page.getByRole("button", { name: "Add to routine" }).click();
+  for (const course of ["CSE 1111", "CSE 4509"]) {
+    await page.getByLabel("Course code").fill(course);
+    await page.getByRole("button", { name: "Add this course" }).click();
   }
   await expect(page.locator(".schedule-card")).toHaveCount(2);
-  await page.getByLabel("Search saved courses").fill("MAT");
+  await expect(page.getByText("Day 4", { exact: true }).last()).toBeVisible();
+  await page.getByLabel("Search saved courses").fill("4509");
   await expect(
-    page.getByText("MAT 1101", { exact: true }).first(),
+    page.getByText("CSE 4509", { exact: true }).first(),
   ).toBeVisible();
   await page.getByRole("button", { name: "Cover page" }).click();
   await expect(page.getByLabel("Cover page preview")).toBeVisible();

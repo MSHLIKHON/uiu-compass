@@ -4,7 +4,7 @@ Live app: https://mshlikhon.github.io/uiu-compass/
 
 **Smart Academic & Financial Navigator** — a local-first, offline-capable React application for UIU students. Independent of United International University.
 
-A local-first application organized around five academic and financial destinations plus Student Tools, with profile onboarding, course history, weighted GPA/CGPA, official grading guidance, exact discrete-grade planning, retake combination search, tuition estimates, selected scholarship continuation checks, manual/partial-verified curricula, exam-routine planning, cover-page preview, scenarios, print-to-PDF reports, backups, Bangla/English UI and dark mode.
+A local-first application organized around five academic and financial destinations plus Student Tools, with profile onboarding, course history, weighted GPA/CGPA, official grading guidance, exact discrete-grade planning, retake combination search, tuition estimates, selected scholarship continuation checks, manual/partial-verified curricula, official Fall 2026 CSE exam-slot lookup, cover-page PDF/DOCX generation, scenarios, print-to-PDF reports, backups, Bangla/English UI and dark mode.
 
 ## Run locally
 
@@ -36,13 +36,13 @@ Browser tests serve the production build at port 4173, including service-worker/
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Home           | Product overview and onboarding                                                                                                                            |
 | Dashboard      | Saved-profile GPA, target, degree progress, fee estimate and projection                                                                                    |
-| CGPA           | Credit dropdown, selected-grade course list, official UIU grading table, weighted projection, course history, charts and grade distribution                |
-| Target         | Program-aware degree totals, one-click remaining-credit path, per-term scenarios, feasibility and exact discrete grade combinations                        |
+| CGPA           | Simple multi-course credit/grade cards, instant projection, official UIU grading table, detailed history, charts and grade distribution                       |
+| Target         | Free-form program and editable degree credits, one-click remaining-credit path, per-term scenarios, feasibility and exact discrete grade combinations       |
 | Retakes        | Explicit highest/latest/all-attempt assumptions, minimum letter grade, up to 1,024 candidate subsets, four ranking goals                                   |
 | Tuition        | Per-credit input or advertised estimate; tuition-only waiver; first-retake concession; excluded credits; integer-paisa breakdown and personal installments |
 | Scholarships   | Selected Spring 2025+ categories, credit/GPA checks and protection forecast; no award certification                                                        |
 | Graduation     | Manual requirements, verified eight-course CSE subset, prerequisites, selectable electives and term-load sequencing                                        |
-| Student Tools  | Searchable multi-course exam routine with time-conflict warnings; locally saved live cover-page preview and browser PDF printing                           |
+| Student Tools  | Official CSE Fall 2026 course-code lookup, multi-course conflict warnings; eight cover types, six styles, group mode, PDF merge and PDF/DOCX download           |
 | Scenarios      | Named saved snapshots, assumptions and academic/cost comparison                                                                                            |
 | Reports        | Print-ready summary; browser Print → Save as PDF supports Bangla; ID omitted by default                                                                    |
 | Settings       | Language, theme, validated JSON backup/restore, explicit replacement/deletion confirmation                                                                 |

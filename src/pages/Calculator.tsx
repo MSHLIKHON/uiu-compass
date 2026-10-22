@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HistoryCharts } from "../components/HistoryCharts";
-import { Plus, Trash2, Copy, Pencil } from "lucide-react";
+import { Plus, Trash2, Copy, Pencil, RotateCcw } from "lucide-react";
 import { useApp } from "../state/AppState";
 import { academic, GRADES, project, gradePoint } from "../domain/academic";
 import type { Course, Grade } from "../domain/types";
@@ -55,6 +55,12 @@ export default function Calculator() {
   );
   const [term, setTerm] = useState(data.courses.at(-1)?.term ?? "Term 1");
   const [deleteId, setDeleteId] = useState("");
+  const [quickRows, setQuickRows] = useState<
+    Array<{ id: string; credits: number; grade: Grade | "" }>
+  >([
+    { id: crypto.randomUUID(), credits: 3, grade: "A" },
+    { id: crypto.randomUUID(), credits: 3, grade: "" },
+  ]);
   const history = data.courses;
   const current = history.filter((c) => c.term === term);
   const preview = draftActive
@@ -77,20 +83,19 @@ export default function Calculator() {
     gpaCredits: null,
     unresolved: false,
   };
-  const quick = calculate(() => {
-    if (termResult.error) throw new Error(termResult.error);
-    if (!termStats.gpaCredits)
-      throw new Error("Enter a graded course to see a result.");
-    if (termStats.unresolved)
-      throw new Error("Resolve repeated attempts before calculating.");
-    if (preview.filter((c) => c.term === term).some((c) => c.attempt > 1))
-      throw new Error(
-        "Quick projection only supports new courses. Use detailed mode for retakes.",
-      );
-    return project(previous, credits, [
-      { credits: termStats.gpaCredits ?? 0, gpa: termStats.gpa ?? 0 },
-    ]);
-  });
+  const quickCredits = quickRows.reduce(
+    (sum, row) => sum + (row.grade ? row.credits : 0),
+    0,
+  );
+  const quickPoints = quickRows.reduce(
+    (sum, row) =>
+      sum + (row.grade ? row.credits * (gradePoint(row.grade) ?? 0) : 0),
+    0,
+  );
+  const quickGpa = quickCredits ? quickPoints / quickCredits : null;
+  const quick = calculate(() =>
+    project(previous, credits, [{ credits: quickCredits, gpa: quickGpa ?? 0 }]),
+  );
   const set = <K extends keyof Course>(k: K, v: Course[K]) => {
     setDraft({ ...draft, [k]: v });
     setDraftActive(true);
@@ -171,218 +176,334 @@ export default function Calculator() {
           <div className="step-label">
             {t("1 · Enter your course", "১ · কোর্সের তথ্য দিন")}
           </div>
-          {data.profile.mode === "quick" && (
-            <div className="form-grid">
-              <NumberField
-                label={t("Previous CGPA", "আগের সিজিপিএ")}
-                value={previous}
-                max={4}
-                onChange={setPrevious}
-              />
-              <NumberField
-                label={t("Previous GPA credits", "আগের জিপিএ ক্রেডিট")}
-                value={credits}
-                max={2000}
-                onChange={setCredits}
-              />
-            </div>
-          )}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setError("");
-              const enteredCode = draft.code.trim().toUpperCase();
-              const nextAutomaticNumber =
-                Math.max(
-                  0,
-                  ...history.map((course) => {
-                    const match = /^COURSE (\d+)$/.exec(course.code);
-                    return match ? Number(match[1]) : 0;
-                  }),
-                ) + 1;
-              const code = enteredCode || `COURSE ${nextAutomaticNumber}`;
-              const normalizedDraft = {
-                ...draft,
-                term: draft.term.trim() || "Current term",
-                code,
-              };
-              if (
-                history.some(
-                  (c) =>
-                    c.id !== draft.id &&
-                    c.code.toUpperCase() === code &&
-                    c.attempt === draft.attempt,
-                )
-              ) {
-                setError("This course attempt already exists.");
-                return;
-              }
-              try {
-                update((d) => ({
-                  ...d,
-                  courses: editing
-                    ? d.courses.map((c) =>
-                        c.id === draft.id ? normalizedDraft : c,
-                      )
-                    : [...d.courses, normalizedDraft],
-                }));
-                setTerm(normalizedDraft.term);
-                setDraft({ ...blank(), term: normalizedDraft.term });
-                setEditing(false);
-                setDraftActive(false);
-                notify(t("Course saved.", "কোর্স সংরক্ষিত হয়েছে।"));
-              } catch (e) {
-                setError(String(e));
-              }
-            }}
-          >
-            <div className="form-grid">
-              <Field label={t("Course credit", "কোর্স ক্রেডিট")}>
-                <select
-                  value={draft.credits}
-                  onChange={(e) => set("credits", Number(e.target.value))}
+          {data.profile.mode === "quick" ? (
+            <>
+              <div className="form-grid quick-basics">
+                <NumberField
+                  label={t("Previous CGPA", "আগের সিজিপিএ")}
+                  value={previous}
+                  max={4}
+                  onChange={setPrevious}
+                />
+                <NumberField
+                  label={t("Previous GPA credits", "আগের জিপিএ ক্রেডিট")}
+                  value={credits}
+                  max={2000}
+                  onChange={setCredits}
+                />
+              </div>
+              <div className="quick-course-list">
+                {quickRows.map((row, index) => (
+                  <div className="quick-course-card" key={row.id}>
+                    <div className="quick-course-title">
+                      <strong>
+                        {t(`Course ${index + 1}`, `কোর্স ${index + 1}`)}
+                      </strong>
+                      {quickRows.length > 1 && (
+                        <button
+                          className="icon-button"
+                          aria-label={`Remove course ${index + 1}`}
+                          onClick={() =>
+                            setQuickRows(
+                              quickRows.filter((item) => item.id !== row.id),
+                            )
+                          }
+                        >
+                          <Trash2 size={17} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="form-grid">
+                      <Field label={t("Credit", "ক্রেডিট")}>
+                        <select
+                          value={row.credits}
+                          onChange={(event) =>
+                            setQuickRows(
+                              quickRows.map((item) =>
+                                item.id === row.id
+                                  ? {
+                                      ...item,
+                                      credits: Number(event.target.value),
+                                    }
+                                  : item,
+                              ),
+                            )
+                          }
+                        >
+                          {[1, 2, 3, 4, 5, 6].map((credit) => (
+                            <option value={credit} key={credit}>
+                              {credit}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Field label={t("Grade", "গ্রেড")}>
+                        <select
+                          value={row.grade}
+                          onChange={(event) =>
+                            setQuickRows(
+                              quickRows.map((item) =>
+                                item.id === row.id
+                                  ? {
+                                      ...item,
+                                      grade: event.target.value as Grade | "",
+                                    }
+                                  : item,
+                              ),
+                            )
+                          }
+                        >
+                          <option value="">Select grade</option>
+                          {GRADES.map((grade) => (
+                            <option key={grade}>{grade}</option>
+                          ))}
+                        </select>
+                      </Field>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="quick-course-actions">
+                <button
+                  className="button"
+                  onClick={() =>
+                    setQuickRows([
+                      ...quickRows,
+                      { id: crypto.randomUUID(), credits: 3, grade: "" },
+                    ])
+                  }
                 >
-                  {[1, 2, 3, 4, 5, 6].map((credit) => (
-                    <option value={credit} key={credit}>
-                      {credit} {credit === 1 ? "credit" : "credits"}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t("Grade", "গ্রেড")}>
-                <select
-                  value={draft.grade}
-                  onChange={(e) => set("grade", e.target.value as Grade)}
+                  <Plus size={17} /> {t("Add more", "আরও যোগ করুন")}
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() =>
+                    setQuickRows([
+                      { id: crypto.randomUUID(), credits: 3, grade: "A" },
+                      { id: crypto.randomUUID(), credits: 3, grade: "" },
+                    ])
+                  }
                 >
-                  {[...GRADES, "I", "W"].map((g) => (
-                    <option key={g}>{g}</option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-            <Advanced
-              title={t("Optional course details", "ঐচ্ছিক কোর্সের বিস্তারিত")}
-            >
+                  <RotateCcw size={16} /> {t("Reset", "রিসেট")}
+                </button>
+              </div>
               <p className="caption">
                 {t(
-                  "Only add these details when you need term history or retake tracking.",
-                  "টার্মের ইতিহাস বা রিটেক হিসাবের দরকার হলেই এই তথ্য দিন।",
+                  "The result updates instantly. Course name, code and term are not needed.",
+                  "ফলাফল সঙ্গে সঙ্গে বদলাবে। কোর্সের নাম, কোড বা টার্ম লাগবে না।",
                 )}
               </p>
-              <div className="form-grid">
-                <Field label={t("Term (optional)", "টার্ম (ঐচ্ছিক)")}>
-                  <input
-                    value={draft.term}
-                    maxLength={200}
-                    onChange={(e) => set("term", e.target.value)}
-                  />
-                </Field>
-                <Field
-                  label={t("Course code (optional)", "কোর্স কোড (ঐচ্ছিক)")}
-                >
-                  <input
-                    value={draft.code}
-                    maxLength={100}
-                    onChange={(e) => set("code", e.target.value)}
-                    placeholder="CSE 1111"
-                  />
-                </Field>
-                <Field
-                  label={t("Course title (optional)", "কোর্সের নাম (ঐচ্ছিক)")}
-                >
-                  <input
-                    value={draft.title}
-                    maxLength={200}
-                    onChange={(e) => set("title", e.target.value)}
-                  />
-                </Field>
-                <NumberField
-                  label={t("Attempt number", "কততম চেষ্টা")}
-                  value={draft.attempt}
-                  min={1}
-                  max={100}
-                  step="1"
-                  onChange={(n) => set("attempt", n)}
-                />
-                <Field label={t("Category", "ধরন")}>
-                  <select
-                    value={draft.category}
-                    onChange={(e) =>
-                      set("category", e.target.value as Course["category"])
-                    }
-                  >
-                    {[
-                      "core",
-                      "elective",
-                      "project",
-                      "thesis",
-                      "internship",
-                      "lab",
-                    ].map((g) => (
-                      <option key={g}>{g}</option>
-                    ))}
-                  </select>
-                </Field>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={draft.excluded}
-                    onChange={(e) => set("excluded", e.target.checked)}
-                  />
-                  {t("Exclude from all totals", "সব হিসাব থেকে বাদ দিন")}
-                </label>
-              </div>
-            </Advanced>
-            <ResultError message={error} />
-            <div className="actions calculator-actions">
-              <button className="button">
-                <Plus size={16} />
-                {t(
-                  editing ? "Save changes" : "Add course",
-                  editing ? "পরিবর্তন সংরক্ষণ" : "কোর্স যোগ করুন",
-                )}
-              </button>
-              {editing && (
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => {
-                    setDraft(blank());
+            </>
+          ) : (
+            <>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setError("");
+                  const enteredCode = draft.code.trim().toUpperCase();
+                  const nextAutomaticNumber =
+                    Math.max(
+                      0,
+                      ...history.map((course) => {
+                        const match = /^COURSE (\d+)$/.exec(course.code);
+                        return match ? Number(match[1]) : 0;
+                      }),
+                    ) + 1;
+                  const code = enteredCode || `COURSE ${nextAutomaticNumber}`;
+                  const normalizedDraft = {
+                    ...draft,
+                    term: draft.term.trim() || "Current term",
+                    code,
+                  };
+                  if (
+                    history.some(
+                      (c) =>
+                        c.id !== draft.id &&
+                        c.code.toUpperCase() === code &&
+                        c.attempt === draft.attempt,
+                    )
+                  ) {
+                    setError("This course attempt already exists.");
+                    return;
+                  }
+                  try {
+                    update((d) => ({
+                      ...d,
+                      courses: editing
+                        ? d.courses.map((c) =>
+                            c.id === draft.id ? normalizedDraft : c,
+                          )
+                        : [...d.courses, normalizedDraft],
+                    }));
+                    setTerm(normalizedDraft.term);
+                    setDraft({ ...blank(), term: normalizedDraft.term });
                     setEditing(false);
                     setDraftActive(false);
+                    notify(t("Course saved.", "কোর্স সংরক্ষিত হয়েছে।"));
+                  } catch (e) {
+                    setError(String(e));
+                  }
+                }}
+              >
+                <div className="form-grid">
+                  <Field label={t("Course credit", "কোর্স ক্রেডিট")}>
+                    <select
+                      value={draft.credits}
+                      onChange={(e) => set("credits", Number(e.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5, 6].map((credit) => (
+                        <option value={credit} key={credit}>
+                          {credit} {credit === 1 ? "credit" : "credits"}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label={t("Grade", "গ্রেড")}>
+                    <select
+                      value={draft.grade}
+                      onChange={(e) => set("grade", e.target.value as Grade)}
+                    >
+                      {[...GRADES, "I", "W"].map((g) => (
+                        <option key={g}>{g}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+                <Advanced
+                  title={t(
+                    "Optional course details",
+                    "ঐচ্ছিক কোর্সের বিস্তারিত",
+                  )}
+                >
+                  <p className="caption">
+                    {t(
+                      "Only add these details when you need term history or retake tracking.",
+                      "টার্মের ইতিহাস বা রিটেক হিসাবের দরকার হলেই এই তথ্য দিন।",
+                    )}
+                  </p>
+                  <div className="form-grid">
+                    <Field label={t("Term (optional)", "টার্ম (ঐচ্ছিক)")}>
+                      <input
+                        value={draft.term}
+                        maxLength={200}
+                        onChange={(e) => set("term", e.target.value)}
+                      />
+                    </Field>
+                    <Field
+                      label={t("Course code (optional)", "কোর্স কোড (ঐচ্ছিক)")}
+                    >
+                      <input
+                        value={draft.code}
+                        maxLength={100}
+                        onChange={(e) => set("code", e.target.value)}
+                        placeholder="CSE 1111"
+                      />
+                    </Field>
+                    <Field
+                      label={t(
+                        "Course title (optional)",
+                        "কোর্সের নাম (ঐচ্ছিক)",
+                      )}
+                    >
+                      <input
+                        value={draft.title}
+                        maxLength={200}
+                        onChange={(e) => set("title", e.target.value)}
+                      />
+                    </Field>
+                    <NumberField
+                      label={t("Attempt number", "কততম চেষ্টা")}
+                      value={draft.attempt}
+                      min={1}
+                      max={100}
+                      step="1"
+                      onChange={(n) => set("attempt", n)}
+                    />
+                    <Field label={t("Category", "ধরন")}>
+                      <select
+                        value={draft.category}
+                        onChange={(e) =>
+                          set("category", e.target.value as Course["category"])
+                        }
+                      >
+                        {[
+                          "core",
+                          "elective",
+                          "project",
+                          "thesis",
+                          "internship",
+                          "lab",
+                        ].map((g) => (
+                          <option key={g}>{g}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    <label className="check">
+                      <input
+                        type="checkbox"
+                        checked={draft.excluded}
+                        onChange={(e) => set("excluded", e.target.checked)}
+                      />
+                      {t("Exclude from all totals", "সব হিসাব থেকে বাদ দিন")}
+                    </label>
+                  </div>
+                </Advanced>
+                <ResultError message={error} />
+                <div className="actions calculator-actions">
+                  <button className="button">
+                    <Plus size={16} />
+                    {t(
+                      editing ? "Save changes" : "Add course",
+                      editing ? "পরিবর্তন সংরক্ষণ" : "কোর্স যোগ করুন",
+                    )}
+                  </button>
+                  {editing && (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => {
+                        setDraft(blank());
+                        setEditing(false);
+                        setDraftActive(false);
+                      }}
+                    >
+                      {t("Cancel", "বাতিল")}
+                    </button>
+                  )}
+                </div>
+              </form>
+              <div className="calculator-reset-row">
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setDraft({ ...blank(), term });
+                    setDraftActive(false);
+                    setEditing(false);
+                    setError("");
                   }}
                 >
-                  {t("Cancel", "বাতিল")}
+                  {t("Clear current entry", "বর্তমান তথ্য মুছুন")}
                 </button>
-              )}
-            </div>
-          </form>
-          <div className="calculator-reset-row">
-            <button
-              className="secondary"
-              onClick={() => {
-                setDraft({ ...blank(), term });
-                setDraftActive(false);
-                setEditing(false);
-                setError("");
-              }}
-            >
-              {t("Clear current entry", "বর্তমান তথ্য মুছুন")}
-            </button>
-          </div>
+              </div>
+            </>
+          )}
         </Card>
         <Card>
           <div className="section-title">
             <h2>{t("2 · Your result", "২ · আপনার ফলাফল")}</h2>
             <Badge tone="amber">{t("USER DATA", "আপনার তথ্য")}</Badge>
           </div>
-          <Field label={t("Selected term", "নির্বাচিত টার্ম")}>
-            <select value={term} onChange={(e) => setTerm(e.target.value)}>
-              {[...new Set([term, ...history.map((c) => c.term)])].map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </Field>
+          {data.profile.mode === "detailed" && (
+            <Field label={t("Selected term", "নির্বাচিত টার্ম")}>
+              <select value={term} onChange={(e) => setTerm(e.target.value)}>
+                {[...new Set([term, ...history.map((c) => c.term)])].map(
+                  (s) => (
+                    <option key={s}>{s}</option>
+                  ),
+                )}
+              </select>
+            </Field>
+          )}
           <div className="big-number">
             {fmt(
               data.profile.mode === "quick"
@@ -395,30 +516,42 @@ export default function Calculator() {
           <div className="breakdown">
             <div>
               <span>{t("Selected term GPA", "নির্বাচিত টার্মের জিপিএ")}</span>
-              <b>{fmt(termStats.gpa)}</b>
+              <b>
+                {fmt(data.profile.mode === "quick" ? quickGpa : termStats.gpa)}
+              </b>
             </div>
             <div>
               <span>
                 {t("Quality points (term)", "টার্মের মোট গ্রেড পয়েন্ট")}
               </span>
-              <b>{fmt(termStats.points)}</b>
+              <b>
+                {fmt(
+                  data.profile.mode === "quick"
+                    ? quickPoints
+                    : termStats.points,
+                )}
+              </b>
             </div>
             <div>
               <span>{t("GPA credits (term)", "টার্মের জিপিএ ক্রেডিট")}</span>
-              <b>{termStats.gpaCredits ?? "Unresolved"}</b>
+              <b>
+                {data.profile.mode === "quick"
+                  ? quickCredits
+                  : (termStats.gpaCredits ?? "Unresolved")}
+              </b>
             </div>
             <div>
               <span>{t("Cumulative GPA credits", "মোট জিপিএ ক্রেডিট")}</span>
               <b>
                 {data.profile.mode === "quick"
-                  ? Number.isFinite(credits) && termStats.gpaCredits !== null
-                    ? credits + termStats.gpaCredits
+                  ? Number.isFinite(credits)
+                    ? credits + quickCredits
                     : "—"
                   : (previewResult.result?.gpaCredits ?? "—")}
               </b>
             </div>
           </div>
-          {draftActive && (
+          {draftActive && data.profile.mode === "detailed" && (
             <p className="live-label">
               {t(
                 "Live preview · save the course to keep it.",
@@ -455,34 +588,53 @@ export default function Calculator() {
                 </p>
               </div>
               <Badge>
-                {preview.filter((course) => course.term === term).length}{" "}
+                {data.profile.mode === "quick"
+                  ? quickRows.length
+                  : preview.filter((course) => course.term === term)
+                      .length}{" "}
                 {t("COURSES", "কোর্স")}
               </Badge>
             </div>
-            {preview
-              .filter((course) => course.term === term)
-              .map((course, index) => (
-                <div className="selected-grade-row" key={course.id}>
-                  <span className="course-number">{index + 1}</span>
-                  <div>
-                    <strong>{course.code || `Course ${index + 1}`}</strong>
-                    <small>
-                      {course.title || `${course.credits} credit course`}
-                    </small>
+            {data.profile.mode === "quick"
+              ? quickRows.map((row, index) => (
+                  <div className="selected-grade-row" key={row.id}>
+                    <span className="course-number">{index + 1}</span>
+                    <div>
+                      <strong>{`Course ${index + 1}`}</strong>
+                      <small>{row.credits} credit course</small>
+                    </div>
+                    <Badge tone={row.grade === "F" ? "amber" : "blue"}>
+                      {row.grade
+                        ? `${row.grade} · ${gradePoint(row.grade) ?? "—"}`
+                        : "Select grade"}
+                    </Badge>
                   </div>
-                  <Badge tone={course.grade === "F" ? "amber" : "blue"}>
-                    {course.grade} · {gradePoint(course.grade) ?? "—"}
-                  </Badge>
-                </div>
-              ))}
-            {!preview.filter((course) => course.term === term).length && (
-              <p className="caption">
-                {t(
-                  "Choose a credit and grade to preview a course here.",
-                  "ক্রেডিট ও গ্রেড বাছাই করলে কোর্স এখানে দেখাবে।",
-                )}
-              </p>
-            )}
+                ))
+              : preview
+                  .filter((course) => course.term === term)
+                  .map((course, index) => (
+                    <div className="selected-grade-row" key={course.id}>
+                      <span className="course-number">{index + 1}</span>
+                      <div>
+                        <strong>{course.code || `Course ${index + 1}`}</strong>
+                        <small>
+                          {course.title || `${course.credits} credit course`}
+                        </small>
+                      </div>
+                      <Badge tone={course.grade === "F" ? "amber" : "blue"}>
+                        {course.grade} · {gradePoint(course.grade) ?? "—"}
+                      </Badge>
+                    </div>
+                  ))}
+            {data.profile.mode === "detailed" &&
+              !preview.filter((course) => course.term === term).length && (
+                <p className="caption">
+                  {t(
+                    "Choose a credit and grade to preview a course here.",
+                    "ক্রেডিট ও গ্রেড বাছাই করলে কোর্স এখানে দেখাবে।",
+                  )}
+                </p>
+              )}
           </div>
         </Card>
       </div>

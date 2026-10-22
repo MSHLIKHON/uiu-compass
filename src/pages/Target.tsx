@@ -16,16 +16,6 @@ import {
   Badge,
   Advanced,
 } from "../components/ui";
-const PROGRAM_CREDITS: Record<string, number> = {
-  CSE: 137,
-  EEE: 140,
-  BBA: 125,
-  Civil: 151.5,
-  English: 123,
-  Pharmacy: 160,
-  "Data Science": 138,
-  Economics: 122,
-};
 export default function Target() {
   const { data, update, t, notify } = useApp(),
     s = summary(data);
@@ -40,12 +30,9 @@ export default function Target() {
         : Number.NaN,
     ),
     [target, setTarget] = useState(data.profile.target);
-  const initialProgram = Object.hasOwn(PROGRAM_CREDITS, data.profile.program)
-    ? data.profile.program
-    : "CSE";
-  const [program, setProgram] = useState(initialProgram);
+  const [program, setProgram] = useState(data.profile.program || "");
   const [degreeCredits, setDegreeCredits] = useState(
-    data.profile.degreeCredits || PROGRAM_CREDITS[initialProgram],
+    data.profile.degreeCredits || 140,
   );
   const [terms, setTerms] = useState([
     { credits: data.profile.load, gpa: 3.67 },
@@ -94,20 +81,12 @@ export default function Target() {
           <h2>{t("Starting point", "শুরুর তথ্য")}</h2>
           <div className="form-grid">
             <Field label={t("Program", "প্রোগ্রাম")}>
-              <select
+              <input
                 value={program}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  setProgram(next);
-                  setDegreeCredits(PROGRAM_CREDITS[next]);
-                }}
-              >
-                {Object.entries(PROGRAM_CREDITS).map(([name, total]) => (
-                  <option value={name} key={name}>
-                    {name} · {total} credits
-                  </option>
-                ))}
-              </select>
+                onChange={(event) => setProgram(event.target.value)}
+                placeholder={t("Type any program", "যেকোনো প্রোগ্রাম লিখুন")}
+                maxLength={100}
+              />
             </Field>
             <NumberField
               label={t("Current CGPA", "বর্তমান সিজিপিএ")}
@@ -133,6 +112,12 @@ export default function Target() {
               max={300}
               onChange={setDegreeCredits}
             />
+            <p className="caption full-span">
+              {t(
+                "Program and total credits are fully editable. Use the curriculum that applies to you.",
+                "প্রোগ্রাম ও মোট ক্রেডিট সম্পূর্ণ পরিবর্তন করা যাবে। আপনার curriculum-এর তথ্য দিন।",
+              )}
+            </p>
           </div>
           <div className="goal-actions">
             <button
