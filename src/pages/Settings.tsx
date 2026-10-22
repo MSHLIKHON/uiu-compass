@@ -134,12 +134,11 @@ export default function Settings() {
           </button>
           <a
             className="secondary"
-            href="https://github.com/MSHLIKHON/uiu-compass/tree/main/integrations/ucam-importer"
-            target="_blank"
-            rel="noreferrer"
+            href={`${import.meta.env.BASE_URL}downloads/uiu-compass-ucam-importer.zip`}
+            download
           >
             <Chrome size={16} />
-            {t("Get extractor", "Extractor নিন")}
+            {t("Download extractor ZIP", "Extractor ZIP ডাউনলোড")}
           </a>
         </div>
         <input

@@ -86,7 +86,7 @@ public/          Icons, SPA redirects, security headers
 
 There are no server calls for student data. The service worker caches only bundled application assets. Student records live in localStorage under `uiu-compass:v1`; backups validate and reconstruct known fields instead of trusting arbitrary properties. Rendering uses React text escaping; imported content is never injected as HTML. Browser storage is not encrypted. It can be lost; shared browser profiles can expose records. Export backups privately.
 
-The optional unpacked Chrome extension and bookmarklet are in [`integrations/ucam-importer`](integrations/ucam-importer). They read only the UCAM result table visible after the student signs in and download a local interchange JSON file. UIU Compass validates the file and asks before merging it; matching course attempts are skipped.
+The optional unpacked Chrome extension and bookmarklet are in [`integrations/ucam-importer`](integrations/ucam-importer), with a ready-to-download ZIP in [`public/downloads`](public/downloads). They read only the UCAM result table visible after the student signs in and download a local interchange JSON file. UIU Compass validates the file and asks before merging it; matching course attempts are skipped.
 
 ## Deployment
 

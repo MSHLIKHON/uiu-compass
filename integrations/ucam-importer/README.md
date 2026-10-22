@@ -4,7 +4,7 @@ This optional, unpacked Chrome extension reads the result table currently visibl
 
 ## Install the extension
 
-1. Download this `ucam-importer` folder from the repository.
+1. Download `uiu-compass-ucam-importer.zip` from UIU Compass Settings and extract it.
 2. Open `chrome://extensions` in Chrome.
 3. Turn on **Developer mode**.
 4. Choose **Load unpacked** and select this folder.
